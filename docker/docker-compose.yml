@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: hw-mgr-nuxt-prod
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-hw_mgr}
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres:18-alpine
+    container_name: hw-mgr-postgres-prod
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-hw_mgr}
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  pgdata_prod:

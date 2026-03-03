@@ -1,0 +1,24 @@
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json yarn.lock ./
+
+# Install dependencies
+RUN yarn install
+
+# Copy local code to the container image
+COPY . .
+
+# Expose Nuxt port
+EXPOSE 3000
+
+# Set environment variables
+ENV HOST=0.0.0.0
+ENV PORT=3000
+ENV NODE_ENV=development
+
+# Start the development server
+CMD ["yarn", "dev"]

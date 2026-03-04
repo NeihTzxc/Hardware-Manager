@@ -7,9 +7,9 @@ const { Pool } = pg
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const adapter = new PrismaPg(pool)
 
-const prismaClient = new PrismaClient({ adapter })
+export const prismaBase = new PrismaClient({ adapter })
 
-const prisma = prismaClient.$extends({
+const db = prismaBase.$extends({
     query: {
         user: {
             async create({ args, query }) {
@@ -22,4 +22,4 @@ const prisma = prismaClient.$extends({
     }
 })
 
-export default prisma
+export default db

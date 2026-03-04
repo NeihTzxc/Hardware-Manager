@@ -13,10 +13,22 @@ datasource db {
 }
 
 model User {
-  id        String   @id // auto generated CUST- prefix from application
-  email     String   @unique
-  name      String?
-  password  String   // hashed payload string
+  id             String         @id // auto generated CUST- prefix from application
+  email          String         @unique
+  name           String?
+  password       String         // bcrypt hashed password
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  refreshTokens  RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }

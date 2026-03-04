@@ -12,14 +12,49 @@ datasource db {
   provider = "postgresql"
 }
 
+// ==================== ENUMS ====================
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum DeviceStatus {
+  AVAILABLE
+  IN_USE
+  MAINTENANCE
+  RETIRED
+  LOST
+}
+
+enum DeviceCondition {
+  NEW
+  GOOD
+  FAIR
+  POOR
+  DAMAGED
+}
+
+enum MaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  UPGRADE
+  INSPECTION
+}
+
+// ==================== MODELS ====================
+
 model User {
-  id             String         @id // auto generated CUST- prefix from application
-  email          String         @unique
-  name           String?
-  password       String         // bcrypt hashed password
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  refreshTokens  RefreshToken[]
+  id            String           @id // auto generated USR- prefix from application
+  email         String           @unique
+  name          String?
+  password      String           // bcrypt hashed password
+  role          Role             @default(USER)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  refreshTokens RefreshToken[]
+  assignments   Assignment[]
+  maintenances  MaintenanceLog[] @relation("PerformedBy")
 }
 
 model RefreshToken {
@@ -31,4 +66,95 @@ model RefreshToken {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model Category {
+  id          String   @id // auto generated CAT- prefix from application
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  devices     Device[]
+}
+
+model Supplier {
+  id           String   @id // auto generated SUP- prefix from application
+  name         String
+  contactEmail String?
+  contactPhone String?
+  address      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  devices      Device[]
+}
+
+model Location {
+  id          String   @id // auto generated LOC- prefix from application
+  name        String   @unique
+  address     String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  devices     Device[]
+}
+
+model Device {
+  id             String          @id // auto generated DEV- prefix from application
+  name           String
+  serialNumber   String          @unique
+  model          String?
+  manufacturer   String?
+  status         DeviceStatus    @default(AVAILABLE)
+  condition      DeviceCondition @default(NEW)
+  purchaseDate   DateTime?
+  purchasePrice  Float?
+  warrantyExpiry DateTime?
+  notes          String?
+  categoryId     String
+  category       Category        @relation(fields: [categoryId], references: [id])
+  supplierId     String?
+  supplier       Supplier?       @relation(fields: [supplierId], references: [id])
+  locationId     String?
+  location       Location?       @relation(fields: [locationId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  assignments    Assignment[]
+  maintenances   MaintenanceLog[]
+
+  @@index([categoryId])
+  @@index([supplierId])
+  @@index([locationId])
+  @@index([status])
+}
+
+model Assignment {
+  id         String    @id @default(uuid())
+  deviceId   String
+  device     Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedAt DateTime  @default(now())
+  returnedAt DateTime?
+  notes      String?
+  createdAt  DateTime  @default(now())
+
+  @@index([deviceId])
+  @@index([userId])
+}
+
+model MaintenanceLog {
+  id                  String          @id @default(uuid())
+  deviceId            String
+  device              Device          @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  type                MaintenanceType
+  description         String
+  cost                Float?
+  performedAt         DateTime        @default(now())
+  nextMaintenanceDate DateTime?
+  performedById       String?
+  performedBy         User?           @relation("PerformedBy", fields: [performedById], references: [id], onDelete: SetNull)
+  createdAt           DateTime        @default(now())
+
+  @@index([deviceId])
+  @@index([performedById])
 }

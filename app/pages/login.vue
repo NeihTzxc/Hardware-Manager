@@ -26,7 +26,7 @@ async function handleLogin() {
 
     // Login thành công — cookies đã được set bởi server
     // Redirect về trang chủ
-    await navigateTo('/')
+    await navigateTo('/dashboard')
   } catch (err: any) {
     errorMessage.value =
       err?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.'

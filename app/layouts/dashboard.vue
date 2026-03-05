@@ -19,6 +19,7 @@ async function handleLogout() {
 
 <template>
   <div class="dashboard-layout">
+    <AppNotification />
     <AppSidebar @logout="handleLogout" />
     <main class="dashboard-main">
       <slot />

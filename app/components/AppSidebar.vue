@@ -4,6 +4,8 @@ import { useAuthStore } from '~/stores/auth'
 const route = useRoute()
 const authStore = useAuthStore()
 
+const emit = defineEmits(['logout'])
+
 const navItems = [
   {
     label: 'Dashboard',
@@ -75,21 +77,33 @@ function isActive(path: string) {
     <div class="sidebar-header">
       <div class="user-profile" :class="{ 'collapsed-profile': isCollapsed }">
         <div class="user-avatar">
-          <span class="avatar-initials">{{ authStore.initials }}</span>
+          <ClientOnly>
+            <span class="avatar-initials">{{ authStore.initials }}</span>
+            <template #fallback>
+              <span class="avatar-initials">?</span>
+            </template>
+          </ClientOnly>
         </div>
         <Transition name="fade-text">
           <div v-if="!isCollapsed" class="user-info">
-            <div class="user-name-row">
-              <span class="user-name">{{ authStore.displayName }}</span>
-              <span
-                v-if="authStore.user?.role"
-                class="role-badge"
-                :class="authStore.user.role === 'ADMIN' ? 'role-admin' : 'role-user'"
-              >
-                {{ authStore.user.role === 'ADMIN' ? 'Admin' : 'User' }}
-              </span>
-            </div>
-            <span class="user-email">{{ authStore.user?.email }}</span>
+            <ClientOnly>
+              <div class="user-name-row">
+                <span class="user-name">{{ authStore.displayName }}</span>
+                <span
+                  v-if="authStore.user?.role"
+                  class="role-badge"
+                  :class="authStore.user.role === 'ADMIN' ? 'role-admin' : 'role-user'"
+                >
+                  {{ authStore.user.role === 'ADMIN' ? 'Admin' : 'User' }}
+                </span>
+              </div>
+              <span class="user-email">{{ authStore.user?.email }}</span>
+              <template #fallback>
+                <div class="user-name-row">
+                  <span class="user-name">Đang tải...</span>
+                </div>
+              </template>
+            </ClientOnly>
           </div>
         </Transition>
       </div>
@@ -156,7 +170,7 @@ function isActive(path: string) {
     <!-- Footer / User section -->
     <div class="sidebar-footer">
       <div class="sidebar-divider" />
-      <button class="nav-link logout-btn" @click="$emit('logout')">
+      <button class="nav-link logout-btn" @click="emit('logout')">
         <div class="nav-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-
+import AppNotification from '~/components/ui/AppNotification.vue'
 const authStore = useAuthStore()
 
 // Fetch user info when entering the dashboard
@@ -19,6 +19,7 @@ async function handleLogout() {
 
 <template>
   <div class="dashboard-layout">
+    <AppNotification />
     <AppSidebar @logout="handleLogout" />
     <main class="dashboard-main">
       <slot />

@@ -25,12 +25,14 @@ async function main() {
         update: {
             password: hashedPassword,
             name: 'Admin User',
+            role: 'ADMIN',
         },
         create: {
             id: `CUST-${crypto.randomUUID()}`,
             email,
             name: 'Admin User',
             password: hashedPassword,
+            role: 'ADMIN',
         },
     })
 

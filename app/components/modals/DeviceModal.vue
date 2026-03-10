@@ -5,6 +5,7 @@ import AppFormControl from '~/components/ui/AppFormControl.vue'
 
 interface Props {
   modelValue: boolean
+  device?: any
 }
 
 const props = defineProps<Props>()
@@ -18,13 +19,18 @@ const isVisible = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
+const isEdit = computed(() => !!props.device)
+const modalTitle = computed(() => isEdit.value ? 'Sửa thông tin thiết bị' : 'Thêm thiết bị mới')
+const submitLabel = computed(() => isEdit.value ? 'Cập nhật thiết bị' : 'Lưu thiết bị')
+
 const loading = ref(false)
 const form = reactive({
   name: '',
   serialNumber: '',
   model: '',
   manufacturer: '',
-  categoryId: ''
+  categoryId: '',
+  status: 'AVAILABLE'
 })
 
 const categories = ref<{ id: string; name: string }[]>([])
@@ -42,6 +48,16 @@ async function fetchCategories() {
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
     fetchCategories()
+    if (props.device) {
+      form.name = props.device.name
+      form.serialNumber = props.device.serialNumber
+      form.model = props.device.model || ''
+      form.manufacturer = props.device.manufacturer || ''
+      form.categoryId = props.device.categoryId
+      form.status = props.device.status
+    } else {
+      resetForm()
+    }
   }
 })
 
@@ -50,19 +66,22 @@ async function handleSave() {
   
   loading.value = true
   try {
-    const data = await api<{ success: boolean; device: any }>('/api/devices', {
-      method: 'POST',
+    const method = isEdit.value ? 'PUT' : 'POST'
+    const url = isEdit.value ? `/api/devices/${props.device.id}` : '/api/devices'
+    
+    const data = await api<{ success: boolean; device: any }>(url, {
+      method,
       body: form
     })
 
     if (data.success) {
-      success('Thành công', 'Thiết bị đã được thêm vào hệ thống')
+      success('Thành công', isEdit.value ? 'Thông tin thiết bị đã được cập nhật' : 'Thiết bị đã được thêm vào hệ thống')
       emit('save', data.device)
       isVisible.value = false
       resetForm()
     }
   } catch (err: any) {
-    const msg = err.data?.message || 'Có lỗi xảy ra khi thêm thiết bị'
+    const msg = err.data?.message || `Có lỗi xảy ra khi ${isEdit.value ? 'cập nhật' : 'thêm'} thiết bị`
     notifyError('Lỗi', msg)
   } finally {
     loading.value = false
@@ -75,11 +94,12 @@ function resetForm() {
   form.model = ''
   form.manufacturer = ''
   form.categoryId = ''
+  form.status = 'AVAILABLE'
 }
 </script>
 
 <template>
-  <AppDialog v-model="isVisible" title="Thêm thiết bị mới" size="md" @close="resetForm">
+  <AppDialog v-model="isVisible" :title="modalTitle" size="md" @close="resetForm">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <AppFormControl label="Tên thiết bị" id="name" required class="md:col-span-2">
         <input v-model="form.name" id="name" type="text" placeholder="Ví dụ: MacBook Pro 2023" />
@@ -105,11 +125,21 @@ function resetForm() {
       <AppFormControl label="Hãng sản xuất" id="manufacturer">
         <input v-model="form.manufacturer" id="manufacturer" type="text" placeholder="Ví dụ: Apple" />
       </AppFormControl>
+
+      <AppFormControl v-if="isEdit" label="Trạng thái" id="status" class="md:col-span-2">
+        <select v-model="form.status" id="status">
+          <option value="AVAILABLE">Sẵn sàng</option>
+          <option value="IN_USE">Đang sử dụng</option>
+          <option value="MAINTENANCE">Bảo trì</option>
+          <option value="RETIRED">Ngừng sử dụng</option>
+          <option value="LOST">Mất</option>
+        </select>
+      </AppFormControl>
     </div>
 
     <template #footer>
       <AppButton label="Hủy" variant="ghost" @click="isVisible = false" />
-      <AppButton label="Lưu thiết bị" variant="primary" icon="pi pi-check" :loading="loading" @click="handleSave" />
+      <AppButton :label="submitLabel" variant="primary" :loading="loading" @click="handleSave" />
     </template>
   </AppDialog>
 </template>

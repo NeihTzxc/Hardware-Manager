@@ -106,11 +106,26 @@ const sizeClasses = computed(() => {
 }
 
 /* Sizes */
-.dialog-sm { max-width: 400px; }
-.dialog-md { max-width: 560px; }
-.dialog-lg { max-width: 800px; }
-.dialog-xl { max-width: 1100px; }
-.dialog-full { max-width: 95vw; height: 95vh; }
+.dialog-sm {
+  max-width: 400px;
+}
+
+.dialog-md {
+  max-width: 560px;
+}
+
+.dialog-lg {
+  max-width: 800px;
+}
+
+.dialog-xl {
+  max-width: 1100px;
+}
+
+.dialog-full {
+  max-width: 95vw;
+  height: 95vh;
+}
 
 .dialog-header {
   padding: var(--spacing-lg) var(--spacing-xl);
@@ -165,17 +180,23 @@ const sizeClasses = computed(() => {
 }
 
 /* Transitions */
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.3s ease;
 }
-.fade-enter-from, .fade-leave-to {
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 
-.dialog-scale-enter-active, .dialog-scale-leave-active {
+.dialog-scale-enter-active,
+.dialog-scale-leave-active {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.dialog-scale-enter-from, .dialog-scale-leave-to {
+
+.dialog-scale-enter-from,
+.dialog-scale-leave-to {
   opacity: 0;
   transform: scale(0.9) translateY(20px);
 }

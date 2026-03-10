@@ -9,6 +9,8 @@ definePageMeta({
 
 const api = useApi()
 const isAddModalOpen = ref(false)
+const isEditModalOpen = ref(false)
+const selectedDevice = ref<any>(null)
 const devices = ref<any[]>([])
 const loading = ref(false)
 
@@ -26,6 +28,17 @@ async function fetchDevices() {
 
 function onDeviceSave() {
   fetchDevices()
+}
+
+function openEditModal(device: any) {
+  selectedDevice.value = { ...device }
+  isEditModalOpen.value = true
+}
+
+function closeModals() {
+  isAddModalOpen.value = false
+  isEditModalOpen.value = false
+  selectedDevice.value = null
 }
 
 onMounted(() => {
@@ -52,11 +65,11 @@ const getStatusLabel = (status: string) => {
         <p class="page-subtitle">Theo dõi và quản lý tất cả thiết bị trong công ty</p>
       </div>
 
-      <AppButton label="Thêm thiết bị" variant="primary" icon="pi pi-plus" @click="isAddModalOpen = true" />
+      <AppButton label="Thêm thiết bị" variant="primary" @click="isAddModalOpen = true" />
     </div>
 
     <div v-if="loading && devices.length === 0" class="loading-container">
-      <i class="pi pi-spin pi-spinner text-4xl text-accent"></i>
+      <div class="spinner-simple"></div>
       <p>Đang tải danh sách thiết bị...</p>
     </div>
 
@@ -97,12 +110,8 @@ const getStatusLabel = (status: string) => {
             </td>
             <td>
               <div class="flex justify-end gap-2">
-                <button class="action-btn" title="Cập nhật">
-                  <i class="pi pi-pencil"></i>
-                </button>
-                <button class="action-btn btn-delete" title="Xóa">
-                  <i class="pi pi-trash"></i>
-                </button>
+                <button class="action-btn" @click="openEditModal(device)">Sửa</button>
+                <button class="action-btn btn-delete">Xóa</button>
               </div>
             </td>
           </tr>
@@ -122,12 +131,15 @@ const getStatusLabel = (status: string) => {
       <p class="empty-state-desc">Hãy bắt đầu bằng cách thêm thiết bị mới vào hệ thống.</p>
 
       <div class="mt-6">
-        <AppButton label="Thêm thiết bị đầu tiên" variant="secondary" icon="pi pi-plus" @click="isAddModalOpen = true" />
+        <AppButton label="Thêm thiết bị đầu tiên" variant="secondary"
+          @click="isAddModalOpen = true" />
       </div>
     </div>
 
-    <!-- Modal Thêm thiết bị -->
+    <!-- Modals -->
     <DeviceModal v-model="isAddModalOpen" @save="onDeviceSave" />
+    <DeviceModal v-model="isEditModalOpen" :device="selectedDevice" @save="onDeviceSave"
+      @update:model-value="val => !val && closeModals()" />
   </div>
 </template>
 
@@ -210,8 +222,14 @@ const getStatusLabel = (status: string) => {
   color: var(--color-text-muted);
 }
 
-.text-accent { color: var(--color-accent); }
-.text-4xl { font-size: 2.5rem; }
+.spinner-simple {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(99, 102, 241, 0.1);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
 
 /* Table Styles */
 .table-container {
@@ -321,17 +339,15 @@ const getStatusLabel = (status: string) => {
 
 /* Action Buttons */
 .action-btn {
-  width: 32px;
-  height: 32px;
+  padding: 6px 14px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .action-btn:hover {
@@ -342,7 +358,7 @@ const getStatusLabel = (status: string) => {
 
 .btn-delete:hover {
   background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-  border-color: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
 }
 </style>

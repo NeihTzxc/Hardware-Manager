@@ -28,6 +28,8 @@ async function handleLogin() {
     // Redirect về trang chủ
     await navigateTo('/dashboard')
   } catch (err: any) {
+    // log err
+    console.log(err)
     errorMessage.value =
       err?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.'
   } finally {
@@ -99,7 +101,9 @@ async function handleLogin() {
         <Transition name="slide-fade">
           <div v-if="errorMessage" class="error-alert" role="alert">
             <svg class="error-icon" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+              <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd" />
             </svg>
             <span>{{ errorMessage }}</span>
           </div>
@@ -114,15 +118,8 @@ async function handleLogin() {
                 <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                 <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
               </svg>
-              <input
-                id="email"
-                v-model="email"
-                type="email"
-                class="form-input"
-                placeholder="name@company.com"
-                autocomplete="email"
-                :disabled="isLoading"
-              />
+              <input id="email" v-model="email" type="email" class="form-input" placeholder="name@company.com"
+                autocomplete="email" :disabled="isLoading" />
             </div>
           </div>
 
@@ -131,33 +128,28 @@ async function handleLogin() {
             <label for="password" class="form-label">Mật khẩu</label>
             <div class="input-wrapper">
               <svg class="input-icon" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+                <path fill-rule="evenodd"
+                  d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                  clip-rule="evenodd" />
               </svg>
-              <input
-                id="password"
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                class="form-input"
-                placeholder="••••••••"
-                autocomplete="current-password"
-                :disabled="isLoading"
-              />
-              <button
-                type="button"
-                class="toggle-password"
-                @click="showPassword = !showPassword"
-                tabindex="-1"
-                :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-              >
+              <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'" class="form-input"
+                placeholder="••••••••" autocomplete="current-password" :disabled="isLoading" />
+              <button type="button" class="toggle-password" @click="showPassword = !showPassword" tabindex="-1"
+                :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
                 <!-- Eye icon -->
                 <svg v-if="!showPassword" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                  <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                  <path fill-rule="evenodd"
+                    d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                    clip-rule="evenodd" />
                 </svg>
                 <!-- Eye-off icon -->
                 <svg v-else viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clip-rule="evenodd" />
-                  <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
+                  <path fill-rule="evenodd"
+                    d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.781zm4.261 4.26l1.514 1.515a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z"
+                    clip-rule="evenodd" />
+                  <path
+                    d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.741L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.065 7 9.542 7 .847 0 1.669-.105 2.454-.303z" />
                 </svg>
               </button>
             </div>
@@ -166,11 +158,7 @@ async function handleLogin() {
           <!-- Remember / Forgot -->
           <div class="form-extras">
             <label class="checkbox-wrapper">
-              <input
-                v-model="rememberMe"
-                type="checkbox"
-                class="checkbox-input"
-              />
+              <input v-model="rememberMe" type="checkbox" class="checkbox-input" />
               <span class="checkbox-custom"></span>
               <span class="checkbox-label">Nhớ mật khẩu</span>
             </label>
@@ -178,14 +166,10 @@ async function handleLogin() {
           </div>
 
           <!-- Submit Button -->
-          <button
-            type="submit"
-            class="btn-login"
-            :disabled="isLoading"
-            :class="{ loading: isLoading }"
-          >
+          <button type="submit" class="btn-login" :disabled="isLoading" :class="{ loading: isLoading }">
             <svg v-if="isLoading" class="spinner" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" />
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none"
+                stroke-dasharray="31.4 31.4" />
             </svg>
             <span v-else>Đăng nhập</span>
           </button>
@@ -388,9 +372,11 @@ async function handleLogin() {
 .slide-fade-enter-active {
   transition: all 0.3s ease;
 }
+
 .slide-fade-leave-active {
   transition: all 0.2s ease;
 }
+
 .slide-fade-enter-from,
 .slide-fade-leave-to {
   opacity: 0;
@@ -453,7 +439,7 @@ async function handleLogin() {
   box-shadow: 0 0 0 3px var(--color-accent-light), var(--shadow-glow);
 }
 
-.form-input:focus ~ .input-icon,
+.form-input:focus~.input-icon,
 .input-wrapper:focus-within .input-icon {
   color: var(--color-accent);
 }
@@ -533,15 +519,15 @@ async function handleLogin() {
   transition: transform var(--transition-fast);
 }
 
-.checkbox-input:checked + .checkbox-custom {
+.checkbox-input:checked+.checkbox-custom {
   border-color: var(--color-accent);
 }
 
-.checkbox-input:checked + .checkbox-custom::after {
+.checkbox-input:checked+.checkbox-custom::after {
   transform: scale(1);
 }
 
-.checkbox-input:focus-visible + .checkbox-custom {
+.checkbox-input:focus-visible+.checkbox-custom {
   box-shadow: 0 0 0 3px var(--color-accent-light);
 }
 

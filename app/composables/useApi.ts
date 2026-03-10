@@ -1,7 +1,6 @@
-import { useAuthStore } from '~/stores/auth'
-
 export const useApi = () => {
-    const authStore = useAuthStore()
+    // Get store inside to avoid circular dependencies during initialization
+    const getAuthStore = () => useAuthStore()
     
     /**
      * Tự động xử lý Refresh Token khi gặp lỗi 401
@@ -14,7 +13,7 @@ export const useApi = () => {
         }
 
         try {
-            return await $fetch<T>(url, { ...opts, headers })
+            return await $fetch(url, { ...opts, headers }) as T
         } catch (err: any) {
             // Nếu lỗi 401 (Unauthorized) và không phải là route login/refresh
             const isAuthRoute = url.includes('/api/auth/login') || url.includes('/api/auth/refresh')
@@ -33,9 +32,10 @@ export const useApi = () => {
                         ...(useRequestHeaders(['cookie']) as Record<string, string>),
                         ...opts?.headers
                     }
-                    return await $fetch<T>(url, { ...opts, headers: retryHeaders })
+                    return await $fetch(url, { ...opts, headers: retryHeaders }) as T
                 } catch (refreshErr) {
-                    // Nếu refresh cũng thất bại -> Logout người dùng
+                    // Đưa useAuthStore vào đây để tránh circular dependency lúc module loading
+                    const authStore = useAuthStore()
                     authStore.clearUser()
                     
                     // Chỉ chuyển hướng nếu đang ở client-side

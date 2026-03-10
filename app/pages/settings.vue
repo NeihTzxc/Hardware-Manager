@@ -2,7 +2,10 @@
 import Tabs from '~/components/ui/Tabs.vue'
 import UserList from '~/components/users/UserList.vue'
 
-definePageMeta({ layout: 'dashboard' })
+definePageMeta({
+  layout: 'dashboard',
+  middleware: 'auth'
+})
 
 const activeTab = ref('users')
 

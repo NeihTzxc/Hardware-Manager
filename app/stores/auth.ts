@@ -28,9 +28,10 @@ export const useAuthStore = defineStore('auth', () => {
     })
 
     async function fetchUser() {
+        const api = useApi()
         loading.value = true
         try {
-            const data = await $fetch<{ success: boolean; user: User }>('/api/auth/me')
+            const data = await api<{ success: boolean; user: User }>('/api/auth/me')
             user.value = data.user
         } catch {
             user.value = null
@@ -38,6 +39,7 @@ export const useAuthStore = defineStore('auth', () => {
             loading.value = false
         }
     }
+
 
     function clearUser() {
         user.value = null

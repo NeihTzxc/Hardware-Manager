@@ -38,8 +38,8 @@ const conditions = [
 
 async function fetchUsers() {
   try {
-    const data = await api<{ success: boolean; users: any[] }>('/api/users')
-    users.value = data.users
+    const res = await api<{ success: boolean; data: any[] }>('/api/users')
+    users.value = res.data
   } catch (err) {
     console.error('Fetch users error:', err)
   }
@@ -57,7 +57,7 @@ watch(() => props.modelValue, (newVal) => {
 
 async function handleBorrow() {
   if (!form.userId || !form.deviceId) return
-  
+
   loading.value = true
   try {
     const data = await api<{ success: boolean }>('/api/assignments', {
@@ -117,7 +117,8 @@ function resetForm() {
       </AppFormControl>
 
       <AppFormControl label="Ghi chú mượn" id="notes">
-        <textarea v-model="form.notes" id="notes" rows="3" placeholder="Ghi chú thêm (lý do mượn, phụ kiện đi kèm...)"></textarea>
+        <textarea v-model="form.notes" id="notes" rows="3"
+          placeholder="Ghi chú thêm (lý do mượn, phụ kiện đi kèm...)"></textarea>
       </AppFormControl>
     </div>
 

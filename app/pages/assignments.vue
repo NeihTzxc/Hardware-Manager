@@ -3,7 +3,7 @@ import AppButton from '~/components/ui/AppButton.vue'
 import AppDialog from '~/components/ui/AppDialog.vue'
 import AppFormControl from '~/components/ui/AppFormControl.vue'
 
-definePageMeta({ 
+definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 })
@@ -52,7 +52,7 @@ function openReturnModal(assignment: any) {
 
 async function handleReturn() {
   if (!selectedAssignment.value) return
-  
+
   returning.value = true
   try {
     const data = await api<{ success: boolean }>(`/api/assignments/${selectedAssignment.value.id}/return`, {
@@ -118,15 +118,14 @@ onMounted(() => {
         <tbody>
           <tr v-for="item in assignments" :key="item.id">
             <td>
-              <div class="flex flex-col">
+              <div class="device-info">
                 <span class="font-bold text-sm">{{ item.device.name }}</span>
                 <span class="text-xs text-muted">{{ item.device.serialNumber }}</span>
               </div>
             </td>
             <td>
-              <div class="flex flex-col">
-                <span class="text-sm">{{ item.user.name || 'N/A' }}</span>
-                <span class="text-xs text-muted">{{ item.user.email }}</span>
+              <div class="user-info">
+                <span class="text-sm font-bold">{{ item.user.name || 'N/A' }}</span>
               </div>
             </td>
             <td>
@@ -140,8 +139,10 @@ onMounted(() => {
             </td>
             <td>
               <div class="flex flex-col gap-1">
-                <span class="text-xs">Lúc mượn: <b>{{ getConditionLabel(item.conditionBefore) }}</b></span>
-                <span v-if="item.returnedAt" class="text-xs">Lúc trả: <b>{{ getConditionLabel(item.conditionAfter) }}</b></span>
+                <span class="text-xs mb-1">Lúc mượn: <b>{{ getConditionLabel(item.conditionBefore) }}</b></span>
+                <br>
+                <span v-if="item.returnedAt" class="text-xs">Lúc trả: <b>{{ getConditionLabel(item.conditionAfter)
+                    }}</b></span>
               </div>
             </td>
             <td>
@@ -159,7 +160,8 @@ onMounted(() => {
 
     <div v-else class="empty-state">
       <div class="empty-state-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+          stroke-linejoin="round">
           <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
           <circle cx="9" cy="7" r="4" />
           <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
@@ -176,7 +178,8 @@ onMounted(() => {
           <div class="text-xs text-muted uppercase font-bold mb-1">Thông tin thiết bị</div>
           <div class="font-bold text-sm">{{ selectedAssignment.device.name }}</div>
           <div class="text-xs text-muted">{{ selectedAssignment.device.serialNumber }}</div>
-          <div class="mt-2 text-xs">Người mượn: <b>{{ selectedAssignment.user.name || selectedAssignment.user.email }}</b></div>
+          <div class="mt-2 text-xs">Người mượn: <b>{{ selectedAssignment.user.name || selectedAssignment.user.email
+              }}</b></div>
         </div>
 
         <AppFormControl label="Tình trạng lúc trả" id="return-condition">
@@ -186,7 +189,8 @@ onMounted(() => {
         </AppFormControl>
 
         <AppFormControl label="Ghi chú trả máy" id="return-notes">
-          <textarea v-model="returnForm.notes" id="return-notes" rows="3" placeholder="Ghi chú về tình trạng máy lúc thu hồi..."></textarea>
+          <textarea v-model="returnForm.notes" id="return-notes" rows="3"
+            placeholder="Ghi chú về tình trạng máy lúc thu hồi..."></textarea>
         </AppFormControl>
       </div>
 
@@ -287,7 +291,9 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Table Styles */
@@ -353,5 +359,12 @@ onMounted(() => {
 .action-btn-primary:hover {
   filter: brightness(1.1);
   transform: translateY(-1px);
+}
+
+.device-info,
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 </style>

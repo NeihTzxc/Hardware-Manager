@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { useLayoutStore } from '~/stores/layout'
 
 const route = useRoute()
 const authStore = useAuthStore()
+const layoutStore = useLayoutStore()
 
 const emit = defineEmits(['logout'])
 
@@ -34,11 +36,10 @@ const navItems = [
   },
 ]
 
-const isCollapsed = ref(false)
 const isMobileOpen = ref(false)
 
 function toggleSidebar() {
-  isCollapsed.value = !isCollapsed.value
+  layoutStore.toggleSidebar()
 }
 
 function toggleMobile() {
@@ -71,11 +72,11 @@ function isActive(path: string) {
   <!-- Sidebar -->
   <aside
     class="sidebar"
-    :class="{ collapsed: isCollapsed, 'mobile-open': isMobileOpen }"
+    :class="{ collapsed: layoutStore.isSidebarCollapsed, 'mobile-open': isMobileOpen }"
   >
     <!-- User Profile Section -->
     <div class="sidebar-header">
-      <div class="user-profile" :class="{ 'collapsed-profile': isCollapsed }">
+      <div class="user-profile" :class="{ 'collapsed-profile': layoutStore.isSidebarCollapsed }">
         <div class="user-avatar">
           <ClientOnly>
             <span class="avatar-initials">{{ authStore.initials }}</span>
@@ -85,7 +86,7 @@ function isActive(path: string) {
           </ClientOnly>
         </div>
         <Transition name="fade-text">
-          <div v-if="!isCollapsed" class="user-info">
+          <div v-if="!layoutStore.isSidebarCollapsed" class="user-info">
             <ClientOnly>
               <div class="user-name-row">
                 <span class="user-name">{{ authStore.displayName }}</span>
@@ -109,9 +110,9 @@ function isActive(path: string) {
       </div>
 
       <!-- Collapse toggle (desktop) -->
-      <button class="collapse-btn" @click="toggleSidebar" :aria-label="isCollapsed ? 'Mở rộng sidebar' : 'Thu nhỏ sidebar'">
+      <button class="collapse-btn" @click="toggleSidebar" :aria-label="layoutStore.isSidebarCollapsed ? 'Mở rộng sidebar' : 'Thu nhỏ sidebar'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path v-if="!isCollapsed" d="M15 18l-6-6 6-6" />
+          <path v-if="!layoutStore.isSidebarCollapsed" d="M15 18l-6-6 6-6" />
           <path v-else d="M9 18l6-6-6-6" />
         </svg>
       </button>
@@ -157,7 +158,7 @@ function isActive(path: string) {
               </svg>
             </div>
             <Transition name="fade-text">
-              <span v-if="!isCollapsed" class="nav-label">{{ item.label }}</span>
+              <span v-if="!layoutStore.isSidebarCollapsed" class="nav-label">{{ item.label }}</span>
             </Transition>
 
             <!-- Active indicator -->
@@ -177,7 +178,7 @@ function isActive(path: string) {
           </svg>
         </div>
         <Transition name="fade-text">
-          <span v-if="!isCollapsed" class="nav-label">Đăng xuất</span>
+          <span v-if="!layoutStore.isSidebarCollapsed" class="nav-label">Đăng xuất</span>
         </Transition>
       </button>
     </div>
@@ -212,6 +213,13 @@ function isActive(path: string) {
   justify-content: space-between;
   padding: var(--spacing-lg) var(--spacing-md);
   min-height: 72px;
+  position: relative;
+}
+
+.collapsed .sidebar-header {
+  flex-direction: column;
+  padding: var(--spacing-md) 0;
+  gap: var(--spacing-sm);
 }
 
 .user-profile {
@@ -330,10 +338,6 @@ function isActive(path: string) {
 .collapse-btn svg {
   width: 18px;
   height: 18px;
-}
-
-.collapsed .collapse-btn {
-  display: none;
 }
 
 /* ===== Navigation ===== */

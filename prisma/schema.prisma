@@ -133,9 +133,11 @@ model Assignment {
   device     Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  assignedAt DateTime  @default(now())
-  returnedAt DateTime?
-  notes      String?
+  assignedAt      DateTime        @default(now())
+  returnedAt      DateTime?
+  conditionBefore DeviceCondition @default(GOOD)
+  conditionAfter  DeviceCondition?
+  notes           String?
   createdAt  DateTime  @default(now())
 
   @@index([deviceId])

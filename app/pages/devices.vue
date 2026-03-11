@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppButton from '~/components/ui/AppButton.vue'
 import DeviceModal from '~/components/modals/DeviceModal.vue'
+import BorrowModal from '~/components/modals/BorrowModal.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -10,6 +11,7 @@ definePageMeta({
 const api = useApi()
 const isAddModalOpen = ref(false)
 const isEditModalOpen = ref(false)
+const isBorrowModalOpen = ref(false)
 const selectedDevice = ref<any>(null)
 const devices = ref<any[]>([])
 const loading = ref(false)
@@ -35,9 +37,15 @@ function openEditModal(device: any) {
   isEditModalOpen.value = true
 }
 
+function openBorrowModal(device: any) {
+  selectedDevice.value = { ...device }
+  isBorrowModalOpen.value = true
+}
+
 function closeModals() {
   isAddModalOpen.value = false
   isEditModalOpen.value = false
+  isBorrowModalOpen.value = false
   selectedDevice.value = null
 }
 
@@ -110,6 +118,7 @@ const getStatusLabel = (status: string) => {
             </td>
             <td>
               <div class="flex justify-end gap-2">
+                <button v-if="device.status === 'AVAILABLE'" class="action-btn-accent" @click="openBorrowModal(device)">Mượn</button>
                 <button class="action-btn" @click="openEditModal(device)">Sửa</button>
                 <button class="action-btn btn-delete">Xóa</button>
               </div>
@@ -139,6 +148,8 @@ const getStatusLabel = (status: string) => {
     <!-- Modals -->
     <DeviceModal v-model="isAddModalOpen" @save="onDeviceSave" />
     <DeviceModal v-model="isEditModalOpen" :device="selectedDevice" @save="onDeviceSave"
+      @update:model-value="val => !val && closeModals()" />
+    <BorrowModal v-model="isBorrowModalOpen" :device="selectedDevice" @save="onDeviceSave"
       @update:model-value="val => !val && closeModals()" />
   </div>
 </template>
@@ -354,6 +365,23 @@ const getStatusLabel = (status: string) => {
   background: var(--color-surface-hover);
   color: var(--color-text-primary);
   border-color: var(--color-text-muted);
+}
+
+.action-btn-accent {
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-accent);
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--color-accent);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.action-btn-accent:hover {
+  background: var(--color-accent);
+  color: white;
 }
 
 .btn-delete:hover {

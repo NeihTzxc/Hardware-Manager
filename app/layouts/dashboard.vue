@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { useLayoutStore } from '~/stores/layout'
 import AppNotification from '~/components/ui/AppNotification.vue'
 const authStore = useAuthStore()
-
+const layoutStore = useLayoutStore()
 
 async function handleLogout() {
   try {
@@ -19,7 +20,7 @@ async function handleLogout() {
   <div class="dashboard-layout">
     <AppNotification />
     <AppSidebar @logout="handleLogout" />
-    <main class="dashboard-main">
+    <main class="dashboard-main" :class="{ 'collapsed': layoutStore.isSidebarCollapsed }">
       <slot />
     </main>
   </div>
@@ -38,6 +39,10 @@ async function handleLogout() {
   padding: var(--spacing-xl) var(--spacing-2xl);
   transition: margin-left var(--transition-base);
   min-height: 100vh;
+}
+
+.dashboard-main.collapsed {
+  margin-left: 76px;
 }
 
 @media (max-width: 768px) {

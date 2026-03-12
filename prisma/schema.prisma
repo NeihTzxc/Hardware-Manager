@@ -138,10 +138,26 @@ model Assignment {
   conditionBefore DeviceCondition @default(GOOD)
   conditionAfter  DeviceCondition?
   notes           String?
-  createdAt  DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  documents       AssignmentDocument[]
 
   @@index([deviceId])
   @@index([userId])
+}
+
+model AssignmentDocument {
+  id           String         @id @default(uuid())
+  assignmentId String
+  assignment   Assignment     @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  templateId   String?
+  template     PrintTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  name         String
+  fileUrl      String         // URL or path inside the server to access the generated PDF
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([assignmentId])
+  @@index([templateId])
 }
 
 model MaintenanceLog {
@@ -159,4 +175,16 @@ model MaintenanceLog {
 
   @@index([deviceId])
   @@index([performedById])
+}
+
+model PrintTemplate {
+  id          String   @id @default(uuid()) // auto generated PRT- prefix could be used
+  name        String   @unique
+  description String?
+  content     String   @db.Text
+  type        String   // 'HANDOVER' | 'RETURN'
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  documents   AssignmentDocument[]
 }

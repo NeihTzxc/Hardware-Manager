@@ -84,6 +84,11 @@ const getConditionLabel = (condition: string) => {
   return labels[condition] || condition
 }
 
+function printDocument(id: string, type: string) {
+  const url = `/api/assignments/${id}/print?type=${type}`
+  window.open(url, '_blank')
+}
+
 onMounted(() => {
   fetchAssignments()
 })
@@ -146,14 +151,32 @@ onMounted(() => {
               </div>
             </td>
             <td>
-              <div class="flex justify-end">
-                <button v-if="!item.returnedAt" class="action-btn-primary" @click="openReturnModal(item)">
-                  Trả máy
-                </button>
-                <div v-else class="text-xs text-muted italic">Hoàn thành</div>
-              </div>
-            </td>
-          </tr>
+              <div class="flex flex-col gap-1 items-end">
+                <div class="flex flex-col gap-2">
+                  <AppButton 
+                    label="In biên bản giao máy" 
+                    variant="ghost" 
+                    size="sm"
+                    @click="printDocument(item.id, 'HANDOVER')" 
+                  />
+                  <AppButton 
+                    v-if="!item.returnedAt"
+                    label="Trả máy" 
+                    variant="primary" 
+                    size="sm"
+                    @click="openReturnModal(item)" 
+                  />
+                  <AppButton 
+                    v-else
+                    label="In biên bản thu hồi" 
+                    variant="success" 
+                    size="sm"
+                    @click="printDocument(item.id, 'RETURN')" 
+                  />
+                </div>
+      </div>
+    </td>
+  </tr>
         </tbody>
       </table>
     </div>

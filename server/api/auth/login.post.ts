@@ -16,6 +16,7 @@ export default defineEventHandler(async (event) => {
     })
 
     if (!user) {
+        console.log('User not found')
         throw createError({
             statusCode: 401,
             message: 'Email hoặc mật khẩu không chính xác.',
@@ -26,6 +27,7 @@ export default defineEventHandler(async (event) => {
     const isPasswordValid = await bcrypt.compare(body.password, user.password)
 
     if (!isPasswordValid) {
+        console.log('Password is not valid')
         throw createError({
             statusCode: 401,
             message: 'Email hoặc mật khẩu không chính xác.',

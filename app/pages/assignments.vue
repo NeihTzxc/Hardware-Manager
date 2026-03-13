@@ -15,6 +15,30 @@ const assignments = ref<any[]>([])
 const loading = ref(false)
 const returning = ref(false)
 
+// Bulk selection state
+const selectedIds = ref<string[]>([])
+
+const isAllSelected = computed(() => {
+  return assignments.value.length > 0 && selectedIds.value.length === assignments.value.length
+})
+
+const canSelectedBePrintedBulk = computed(() => {
+    if (selectedIds.value.length < 2) return false
+    const selectedAssignments = assignments.value.filter(a => selectedIds.value.includes(a.id))
+    const firstUserId = selectedAssignments[0].userId
+    const firstIsReturned = !!selectedAssignments[0].returnedAt
+    
+    return selectedAssignments.every(a => a.userId === firstUserId && !!a.returnedAt === firstIsReturned)
+})
+
+const selectedItemsDescription = computed(() => {
+    if (selectedIds.value.length === 0) return ''
+    const selectedAssignments = assignments.value.filter(a => selectedIds.value.includes(a.id))
+    const firstUser = selectedAssignments[0].user.name || selectedAssignments[0].user.email
+    const type = !!selectedAssignments[0].returnedAt ? 'thu hồi' : 'giao máy'
+    return `Đang chọn ${selectedIds.value.length} thiết bị ${type} của ${firstUser}`
+})
+
 // Return Device Modal State
 const isReturnModalOpen = ref(false)
 const selectedAssignment = ref<any>(null)
@@ -89,6 +113,59 @@ function printDocument(id: string, type: string) {
   window.open(url, '_blank')
 }
 
+function printBulk() {
+  if (selectedIds.value.length === 0) return
+  
+  const selectedAssignments = assignments.value.filter(a => selectedIds.value.includes(a.id))
+  const type = !!selectedAssignments[0].returnedAt ? 'RETURN' : 'HANDOVER'
+  const ids = selectedIds.value.join(',')
+  
+  const url = `/api/assignments/print-bulk?ids=${ids}&type=${type}`
+  window.open(url, '_blank')
+}
+
+function toggleSelect(id: string) {
+  const index = selectedIds.value.indexOf(id)
+  if (index === -1) {
+    // Check if valid to add
+    if (selectedIds.value.length > 0) {
+        const firstId = selectedIds.value[0]
+        const firstItem = assignments.value.find(a => a.id === firstId)
+        const currentItem = assignments.value.find(a => a.id === id)
+        
+        if (firstItem.userId !== currentItem.userId) {
+            notifyError('Không thể chọn', 'Các thiết bị phải thuộc về cùng một nhân viên để in gộp')
+            return
+        }
+        if (!!firstItem.returnedAt !== !!currentItem.returnedAt) {
+            notifyError('Không thể chọn', 'Các thiết bị phải cùng trạng thái (đang mượn hoặc đã trả) để in gộp')
+            return
+        }
+    }
+    selectedIds.value.push(id)
+  } else {
+    selectedIds.value.splice(index, 1)
+  }
+}
+
+function toggleAll() {
+  if (isAllSelected.value) {
+    selectedIds.value = []
+  } else {
+    // Logic for toggle all is tricky because they must be same user/type
+    // For simplicity, we just clear and only allow manual selection, 
+    // or we only select items matching the FIRST selected item if any
+    if (selectedIds.value.length === 0) {
+        // Just select everything if they happen to be all same (rare), 
+        // but better to just disable toggle all for bulk printing safety.
+        // Let's just avoid bulk selecting all if the list is mixed.
+        notifyError('Lưu ý', 'Vui lòng chọn thủ công các thiết bị của cùng một người để in gộp')
+    } else {
+        selectedIds.value = []
+    }
+  }
+}
+
 onMounted(() => {
   fetchAssignments()
 })
@@ -101,6 +178,25 @@ onMounted(() => {
         <h1 class="page-title">Quản lý mượn trả</h1>
         <p class="page-subtitle">Theo dõi lịch sử cấp phát và thu hồi thiết bị</p>
       </div>
+      <div class="flex items-center gap-4">
+        <span v-if="selectedIds.length > 0" class="text-xs text-muted italic">
+          {{ selectedItemsDescription }}
+        </span>
+        <AppButton 
+          v-if="canSelectedBePrintedBulk"
+          label="In gộp biên bản" 
+          variant="primary" 
+          icon="i-heroicons-printer"
+          @click="printBulk"
+        />
+        <AppButton 
+          v-if="selectedIds.length > 0"
+          label="Bỏ chọn" 
+          variant="ghost" 
+          size="sm"
+          @click="selectedIds = []"
+        />
+      </div>
     </div>
 
     <div v-if="loading && assignments.length === 0" class="loading-container">
@@ -112,6 +208,9 @@ onMounted(() => {
       <table class="app-table">
         <thead>
           <tr>
+            <th class="w-10">
+              <!-- Checkbox header removed for safety, use manual selection -->
+            </th>
             <th>Thiết bị</th>
             <th>Người mượn</th>
             <th>Ngày mượn</th>
@@ -121,7 +220,15 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in assignments" :key="item.id">
+          <tr v-for="item in assignments" :key="item.id" :class="{ 'bg-accent/5': selectedIds.includes(item.id) }">
+            <td class="w-10">
+                <input 
+                    type="checkbox" 
+                    :checked="selectedIds.includes(item.id)"
+                    @change="toggleSelect(item.id)"
+                    class="rounded border-border text-accent focus:ring-accent"
+                />
+            </td>
             <td>
               <div class="device-info">
                 <span class="font-bold text-sm">{{ item.device.name }}</span>

@@ -141,7 +141,7 @@ async function handleSubmit() {
         <div class="text-xs text-muted mb-2">
           Các biến có sẵn: <b v-pre>{{userName}}</b>, <b v-pre>{{userEmail}}</b>, 
           <b v-pre>{{deviceName}}</b>, <b v-pre>{{serialNumber}}</b>, 
-          <b v-pre>{{date}}</b>, <b v-pre>{{condition}}</b>
+          <b v-pre>{{date}}</b>, <b v-pre>{{condition}}</b>, <b v-pre>{{deviceList}}</b>
         </div>
         <textarea 
           v-model="form.content" 

@@ -42,6 +42,19 @@ enum MaintenanceType {
   INSPECTION
 }
 
+enum CategoryType {
+  DEVICE
+  COMPONENT
+  ACCESSORY
+}
+
+enum ComponentStatus {
+  AVAILABLE
+  INSTALLED
+  DEFECTIVE
+  DISPOSED
+}
+
 // ==================== MODELS ====================
 
 model User {
@@ -52,9 +65,10 @@ model User {
   role          Role             @default(USER)
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
-  refreshTokens RefreshToken[]
-  assignments   Assignment[]
-  maintenances  MaintenanceLog[] @relation("PerformedBy")
+  refreshTokens      RefreshToken[]
+  assignments        Assignment[]
+  maintenances       MaintenanceLog[] @relation("PerformedBy")
+  accessoryCheckouts AccessoryCheckout[]
 }
 
 model RefreshToken {
@@ -69,12 +83,15 @@ model RefreshToken {
 }
 
 model Category {
-  id          String   @id // auto generated CAT- prefix from application
-  name        String   @unique
+  id          String       @id // auto generated CAT- prefix from application
+  name        String       @unique
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  type        CategoryType @default(DEVICE)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   devices     Device[]
+  components  Component[]
+  accessories Accessory[]
 }
 
 model Supplier {
@@ -86,6 +103,8 @@ model Supplier {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   devices      Device[]
+  components   Component[]
+  accessories  Accessory[]
 }
 
 model Location {
@@ -96,6 +115,8 @@ model Location {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   devices     Device[]
+  components  Component[]
+  accessories Accessory[]
 }
 
 model Device {
@@ -120,6 +141,8 @@ model Device {
   updatedAt      DateTime        @updatedAt
   assignments    Assignment[]
   maintenances   MaintenanceLog[]
+  components     Component[]
+  componentInstallations ComponentInstallation[]
 
   @@index([categoryId])
   @@index([supplierId])
@@ -187,4 +210,89 @@ model PrintTemplate {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   documents   AssignmentDocument[]
+}
+
+// ==================== COMPONENT & ACCESSORY ====================
+
+model Component {
+  id             String          @id // auto generated CMP- prefix from application
+  name           String
+  serialNumber   String?
+  categoryId     String
+  category       Category        @relation(fields: [categoryId], references: [id])
+  manufacturer   String?
+  status         ComponentStatus @default(AVAILABLE)
+  purchaseDate   DateTime?
+  purchasePrice  Float?
+  warrantyExpiry DateTime?
+  notes          String?
+  supplierId     String?
+  supplier       Supplier?       @relation(fields: [supplierId], references: [id])
+  locationId     String?
+  location       Location?       @relation(fields: [locationId], references: [id])
+  deviceId       String?
+  device         Device?         @relation(fields: [deviceId], references: [id])
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  installations  ComponentInstallation[]
+
+  @@index([categoryId])
+  @@index([supplierId])
+  @@index([locationId])
+  @@index([deviceId])
+  @@index([status])
+}
+
+model ComponentInstallation {
+  id           String    @id @default(uuid())
+  componentId  String
+  component    Component @relation(fields: [componentId], references: [id], onDelete: Cascade)
+  deviceId     String
+  device       Device    @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  installedAt  DateTime  @default(now())
+  removedAt    DateTime?
+  notes        String?
+  createdAt    DateTime  @default(now())
+
+  @@index([componentId])
+  @@index([deviceId])
+}
+
+model Accessory {
+  id            String    @id // auto generated ACC- prefix from application
+  name          String
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id])
+  manufacturer  String?
+  totalQuantity Int       @default(0)
+  minQuantity   Int       @default(0)
+  unitPrice     Float?
+  notes         String?
+  supplierId    String?
+  supplier      Supplier? @relation(fields: [supplierId], references: [id])
+  locationId    String?
+  location      Location? @relation(fields: [locationId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  checkouts     AccessoryCheckout[]
+
+  @@index([categoryId])
+  @@index([supplierId])
+  @@index([locationId])
+}
+
+model AccessoryCheckout {
+  id           String    @id @default(uuid())
+  accessoryId  String
+  accessory    Accessory @relation(fields: [accessoryId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quantity     Int       @default(1)
+  checkedOutAt DateTime  @default(now())
+  returnedAt   DateTime?
+  notes        String?
+  createdAt    DateTime  @default(now())
+
+  @@index([accessoryId])
+  @@index([userId])
 }

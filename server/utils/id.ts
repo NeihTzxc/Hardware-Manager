@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 
-type Prefix = 'USR' | 'CAT' | 'DEV' | 'SUP' | 'LOC'
+type Prefix = 'USR' | 'CAT' | 'DEV' | 'SUP' | 'LOC' | 'CMP' | 'ACC'
 
 export function generateId(prefix: Prefix): string {
     const random = crypto.randomBytes(4).toString('hex').toUpperCase()

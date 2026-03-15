@@ -1,9 +1,15 @@
 export default defineEventHandler(async (event) => {
-    // Basic protection (optional, can depend on auth middleware)
-    // const user = event.context.user
-    
+    const query = getQuery(event)
+    const type = query.type as string | undefined
+
     try {
+        const where: any = {}
+        if (type && ['DEVICE', 'COMPONENT', 'ACCESSORY'].includes(type)) {
+            where.type = type
+        }
+
         const categories = await db.category.findMany({
+            where,
             orderBy: { name: 'asc' }
         })
         
@@ -18,3 +24,4 @@ export default defineEventHandler(async (event) => {
         })
     }
 })
+

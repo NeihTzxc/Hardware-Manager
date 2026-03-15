@@ -13,19 +13,69 @@ const isAddModalOpen = ref(false)
 const isEditModalOpen = ref(false)
 const isBorrowModalOpen = ref(false)
 const selectedDevice = ref<any>(null)
+const searchQuery = ref('')
+const selectedCategory = ref('')
+const selectedStatus = ref('')
 const devices = ref<any[]>([])
+const categories = ref<any[]>([])
 const loading = ref(false)
+
+const statusOptions = [
+  { label: 'Tất cả trạng thái', value: '' },
+  { label: 'Sẵn sàng', value: 'AVAILABLE' },
+  { label: 'Đang sử dụng', value: 'IN_USE' },
+  { label: 'Bảo trì', value: 'MAINTENANCE' },
+  { label: 'Ngừng sử dụng', value: 'RETIRED' },
+  { label: 'Mất', value: 'LOST' }
+]
+
+async function fetchCategories() {
+  try {
+    const data = await api<{ success: boolean; data: any[] }>('/api/categories/list', {
+      params: { type: 'DEVICE' }
+    })
+    categories.value = data.data
+  } catch (err) {
+    console.error('Fetch categories error:', err)
+  }
+}
 
 async function fetchDevices() {
   loading.value = true
   try {
-    const data = await api<{ success: boolean; devices: any[] }>('/api/devices')
+    const data = await api<{ success: boolean; devices: any[] }>('/api/devices', {
+      params: { 
+        q: searchQuery.value,
+        categoryId: selectedCategory.value || undefined,
+        status: selectedStatus.value || undefined
+      }
+    })
     devices.value = data.devices
   } catch (err) {
     console.error('Fetch devices error:', err)
   } finally {
     loading.value = false
   }
+}
+
+// Debounced search
+let searchTimeout: NodeJS.Timeout
+watch(searchQuery, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    fetchDevices()
+  }, 400)
+})
+
+// Immediate fetch on filter change
+watch([selectedCategory, selectedStatus], () => {
+  fetchDevices()
+})
+
+function clearFilters() {
+  searchQuery.value = ''
+  selectedCategory.value = ''
+  selectedStatus.value = ''
 }
 
 function onDeviceSave() {
@@ -51,6 +101,7 @@ function closeModals() {
 
 onMounted(() => {
   fetchDevices()
+  fetchCategories()
 })
 
 const getStatusLabel = (status: string) => {
@@ -63,6 +114,9 @@ const getStatusLabel = (status: string) => {
   }
   return labels[status] || status
 }
+const isFiltered = computed(() => {
+  return searchQuery.value || selectedCategory.value || selectedStatus.value
+})
 </script>
 
 <template>
@@ -73,7 +127,31 @@ const getStatusLabel = (status: string) => {
         <p class="page-subtitle">Theo dõi và quản lý tất cả thiết bị trong công ty</p>
       </div>
 
-      <AppButton label="Thêm thiết bị" variant="primary" @click="isAddModalOpen = true" />
+      <div class="header-actions">
+        <div class="filter-group">
+          <select v-model="selectedCategory" class="custom-select">
+            <option value="">Tất cả danh mục</option>
+            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+              {{ cat.name }}
+            </option>
+          </select>
+
+          <select v-model="selectedStatus" class="custom-select">
+            <option v-for="opt in statusOptions" :key="opt.value" :value="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
+        </div>
+
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input v-model="searchQuery" type="text" placeholder="Tìm kiếm..." class="search-input" />
+        </div>
+        <AppButton label="Thêm thiết bị" variant="primary" @click="isAddModalOpen = true" />
+      </div>
     </div>
 
     <div v-if="loading && devices.length === 0" class="loading-container">
@@ -130,18 +208,25 @@ const getStatusLabel = (status: string) => {
 
     <div v-else class="empty-state">
       <div class="empty-state-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+        <svg v-if="isFiltered" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          <line x1="8" y1="8" x2="14" y2="14" />
+          <line x1="14" y1="8" x2="8" y2="14" />
+        </svg>
+        <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
           stroke-linejoin="round">
           <rect x="2" y="3" width="20" height="14" rx="2" />
           <path d="M8 21h8M12 17v4" />
         </svg>
       </div>
-      <h3 class="empty-state-title">Chưa có thiết bị nào</h3>
-      <p class="empty-state-desc">Hãy bắt đầu bằng cách thêm thiết bị mới vào hệ thống.</p>
+      <h3 class="empty-state-title">{{ isFiltered ? 'Không tìm thấy kết quả phù hợp' : 'Chưa có thiết bị nào' }}</h3>
+      <p class="empty-state-desc">{{ isFiltered ? 'Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.' : 'Hãy bắt đầu bằng cách thêm thiết bị mới vào hệ thống.' }}</p>
 
       <div class="mt-6">
-        <AppButton label="Thêm thiết bị đầu tiên" variant="secondary"
+        <AppButton v-if="!isFiltered" label="Thêm thiết bị đầu tiên" variant="secondary"
           @click="isAddModalOpen = true" />
+        <AppButton v-else label="Xóa lọc" variant="ghost" @click="clearFilters" />
       </div>
     </div>
 
@@ -164,6 +249,68 @@ const getStatusLabel = (status: string) => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--spacing-2xl);
+  gap: var(--spacing-lg);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 8px 12px 8px 36px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  width: 280px;
+  transition: all var(--transition-fast);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.filter-group {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.custom-select {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 8px 12px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-width: 150px;
+}
+
+.custom-select:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .page-title {

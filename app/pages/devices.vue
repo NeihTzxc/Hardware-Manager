@@ -19,6 +19,8 @@ const selectedStatus = ref('')
 const devices = ref<any[]>([])
 const categories = ref<any[]>([])
 const loading = ref(false)
+const sortField = ref('createdAt')
+const sortOrder = ref<'asc' | 'desc'>('desc')
 
 const statusOptions = [
   { label: 'Tất cả trạng thái', value: '' },
@@ -47,7 +49,9 @@ async function fetchDevices() {
       params: { 
         q: searchQuery.value,
         categoryId: selectedCategory.value || undefined,
-        status: selectedStatus.value || undefined
+        status: selectedStatus.value || undefined,
+        field: sortField.value,
+        value: sortOrder.value
       }
     })
     devices.value = data.devices
@@ -68,9 +72,18 @@ watch(searchQuery, () => {
 })
 
 // Immediate fetch on filter change
-watch([selectedCategory, selectedStatus], () => {
+watch([selectedCategory, selectedStatus, sortField, sortOrder], () => {
   fetchDevices()
 })
+
+function handleSort(field: string) {
+  if (sortField.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortOrder.value = 'asc'
+  }
+}
 
 function clearFilters() {
   searchQuery.value = ''
@@ -163,11 +176,43 @@ const isFiltered = computed(() => {
       <table class="app-table">
         <thead>
           <tr>
-            <th>Tên thiết bị</th>
-            <th>Số Serial</th>
+            <th @click="handleSort('name')" class="sortable">
+              <div class="flex items-center gap-1">
+                Tên thiết bị
+                <span v-if="sortField === 'name'" class="sort-icon">
+                  {{ sortOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+                <span v-else class="sort-icon invisible group-hover:visible">↕</span>
+              </div>
+            </th>
+            <th @click="handleSort('serialNumber')" class="sortable">
+              <div class="flex items-center gap-1">
+                Số Serial
+                <span v-if="sortField === 'serialNumber'" class="sort-icon">
+                  {{ sortOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+                <span v-else class="sort-icon invisible group-hover:visible">↕</span>
+              </div>
+            </th>
             <th>Danh mục</th>
-            <th>Model / Hãng</th>
-            <th>Trạng thái</th>
+            <th @click="handleSort('model')" class="sortable">
+              <div class="flex items-center gap-1">
+                Model / Hãng
+                <span v-if="sortField === 'model'" class="sort-icon">
+                  {{ sortOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+                <span v-else class="sort-icon invisible group-hover:visible">↕</span>
+              </div>
+            </th>
+            <th @click="handleSort('status')" class="sortable">
+              <div class="flex items-center gap-1">
+                Trạng thái
+                <span v-if="sortField === 'status'" class="sort-icon">
+                  {{ sortOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+                <span v-else class="sort-icon invisible group-hover:visible">↕</span>
+              </div>
+            </th>
             <th class="text-right">Hành động</th>
           </tr>
         </thead>
@@ -413,6 +458,30 @@ const isFiltered = computed(() => {
   letter-spacing: 0.05em;
   color: var(--color-text-secondary);
   border-bottom: 1px solid var(--color-border);
+}
+
+.app-table th.sortable {
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.app-table th.sortable:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
+}
+
+.sort-icon {
+  font-size: 14px;
+  display: inline-block;
+  min-width: 12px;
+}
+
+.invisible {
+  opacity: 0;
+}
+
+.sortable:hover .invisible {
+  opacity: 0.5;
 }
 
 .app-table td {

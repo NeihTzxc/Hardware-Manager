@@ -30,6 +30,19 @@ export default defineEventHandler(async (event) => {
             where.AND = conditions
         }
 
+        const sortField = (query.field as string) || 'createdAt'
+        const sortValue = (query.value as string) || 'desc'
+
+        // Define valid sort fields to prevent injection
+        const validSortFields = ['name', 'serialNumber', 'status', 'createdAt', 'model', 'manufacturer']
+        const orderBy: any = {}
+        
+        if (validSortFields.includes(sortField)) {
+            orderBy[sortField] = sortValue === 'asc' ? 'asc' : 'desc'
+        } else {
+            orderBy.createdAt = 'desc'
+        }
+
         const devices = await db.device.findMany({
             where,
             include: {
@@ -40,9 +53,7 @@ export default defineEventHandler(async (event) => {
                     }
                 }
             },
-            orderBy: {
-                createdAt: 'desc'
-            }
+            orderBy
         })
 
         return {

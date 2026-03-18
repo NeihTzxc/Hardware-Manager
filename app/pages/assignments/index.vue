@@ -8,6 +8,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
+const router = useRouter()
 const api = useApi()
 const { success, error: notifyError } = useNotification()
 
@@ -72,6 +73,10 @@ function openReturnModal(assignment: any) {
   returnForm.conditionAfter = assignment.device.condition || 'GOOD'
   returnForm.notes = ''
   isReturnModalOpen.value = true
+}
+
+async function goToDetail(id: string) {
+  router.push(`/assignments/${id}`)
 }
 
 async function handleReturn() {
@@ -220,12 +225,13 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in assignments" :key="item.id" :class="{ 'bg-accent/5': selectedIds.includes(item.id) }">
+          <tr v-for="item in assignments" :key="item.id" @click="goToDetail(item.id)" class="clickable-row" :class="{ 'bg-accent/5': selectedIds.includes(item.id) }">
             <td class="w-10">
                 <input 
                     type="checkbox" 
                     :checked="selectedIds.includes(item.id)"
                     @change="toggleSelect(item.id)"
+                    @click.stop
                     class="rounded border-border text-accent focus:ring-accent"
                 />
             </td>
@@ -264,21 +270,21 @@ onMounted(() => {
                     label="In biên bản giao máy" 
                     variant="ghost" 
                     size="sm"
-                    @click="printDocument(item.id, 'HANDOVER')" 
+                    @click.stop="printDocument(item.id, 'HANDOVER')" 
                   />
                   <AppButton 
                     v-if="!item.returnedAt"
                     label="Trả máy" 
                     variant="primary" 
                     size="sm"
-                    @click="openReturnModal(item)" 
+                    @click.stop="openReturnModal(item)" 
                   />
                   <AppButton 
                     v-else
                     label="In biên bản thu hồi" 
                     variant="success" 
                     size="sm"
-                    @click="printDocument(item.id, 'RETURN')" 
+                    @click.stop="printDocument(item.id, 'RETURN')" 
                   />
                 </div>
       </div>
@@ -463,7 +469,12 @@ onMounted(() => {
 }
 
 .app-table tr:hover {
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
 }
 
 .text-success {

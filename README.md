@@ -73,3 +73,66 @@ bun run preview
 ```
 
 Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+
+## Setup Docker
+
+Make sure you have [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installed.
+
+### Development Mode
+
+Run with hot reload for development:
+
+```bash
+docker compose -f docker/docker-compose.dev.yml up -d
+```
+
+### Production Mode
+
+Build and run in production mode:
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
+
+### Database Management (Prisma)
+
+Once the containers are running, you need to sync your database schema:
+
+#### Development
+
+```bash
+# Run migrations and update Prisma Client
+docker compose -f docker/docker-compose.dev.yml exec web npx prisma migrate dev
+
+# Seed initial data (optional)
+docker compose -f docker/docker-compose.dev.yml exec web npx prisma db seed
+```
+
+#### Production
+
+```bash
+# Apply existing migrations (no dev-related changes)
+docker compose -f docker/docker-compose.yml exec web npx prisma migrate deploy
+```
+
+### Other Commands
+
+To stop the containers:
+
+```bash
+# For Development
+docker compose -f docker/docker-compose.dev.yml down
+
+# For Production
+docker compose -f docker/docker-compose.yml down
+```
+
+### Build manually (Optional)
+
+```bash
+# Build Development image
+docker build -t hardware-manager:dev -f docker/Dockerfile.dev .
+
+# Build Production image
+docker build -t hardware-manager:prod -f docker/Dockerfile .
+```

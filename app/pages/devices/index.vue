@@ -8,6 +8,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
+const router = useRouter()
 const api = useApi()
 const isAddModalOpen = ref(false)
 const isEditModalOpen = ref(false)
@@ -110,6 +111,10 @@ function closeModals() {
   isEditModalOpen.value = false
   isBorrowModalOpen.value = false
   selectedDevice.value = null
+}
+
+function goToDetail(id: string) {
+  router.push(`/devices/${id}`)
 }
 
 onMounted(() => {
@@ -217,7 +222,7 @@ const isFiltered = computed(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="device in devices" :key="device.id">
+          <tr v-for="device in devices" :key="device.id" @click="goToDetail(device.id)" class="clickable-row">
             <td>
               <div class="device-info">
                 <span class="device-name font-bold">{{ device.name }}</span>
@@ -241,9 +246,9 @@ const isFiltered = computed(() => {
             </td>
             <td>
               <div class="flex justify-end gap-2">
-                <button v-if="device.status === 'AVAILABLE'" class="action-btn-accent" @click="openBorrowModal(device)">Mượn</button>
-                <button class="action-btn" @click="openEditModal(device)">Sửa</button>
-                <button class="action-btn btn-delete">Xóa</button>
+                <button v-if="device.status === 'AVAILABLE'" class="action-btn-accent" @click.stop="openBorrowModal(device)">Mượn</button>
+                <button class="action-btn" @click.stop="openEditModal(device)">Sửa</button>
+                <button class="action-btn btn-delete" @click.stop>Xóa</button>
               </div>
             </td>
           </tr>
@@ -495,7 +500,12 @@ const isFiltered = computed(() => {
 }
 
 .app-table tr:hover {
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
 }
 
 /* Device Info Cell */

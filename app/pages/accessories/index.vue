@@ -1,98 +1,84 @@
 <script setup lang="ts">
 import AppButton from '~/components/ui/AppButton.vue'
-import ComponentModal from '~/components/modals/ComponentModal.vue'
-import InstallComponentModal from '~/components/modals/InstallComponentModal.vue'
+import AccessoryModal from '~/components/modals/AccessoryModal.vue'
+import CheckoutAccessoryModal from '~/components/modals/CheckoutAccessoryModal.vue'
 
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 })
 
+const router = useRouter()
 const api = useApi()
 const { success: notifySuccess, error: notifyError } = useNotification()
 
 const isAddModalOpen = ref(false)
 const isEditModalOpen = ref(false)
-const isInstallModalOpen = ref(false)
-const selectedComponent = ref<any>(null)
-const components = ref<any[]>([])
+const isCheckoutModalOpen = ref(false)
+const selectedAccessory = ref<any>(null)
+const accessories = ref<any[]>([])
 const loading = ref(false)
 
-async function fetchComponents() {
+async function fetchAccessories() {
   loading.value = true
   try {
-    const data = await api<{ success: boolean; components: any[] }>('/api/components')
-    components.value = data.components
+    const data = await api<{ success: boolean; accessories: any[] }>('/api/accessories')
+    accessories.value = data.accessories
   } catch (err) {
-    console.error('Fetch components error:', err)
+    console.error('Fetch accessories error:', err)
   } finally {
     loading.value = false
   }
 }
 
 function onSave() {
-  fetchComponents()
+  fetchAccessories()
 }
 
-function openEditModal(comp: any) {
-  selectedComponent.value = { ...comp }
+function openEditModal(acc: any) {
+  selectedAccessory.value = { ...acc }
   isEditModalOpen.value = true
 }
 
-function openInstallModal(comp: any) {
-  selectedComponent.value = { ...comp }
-  isInstallModalOpen.value = true
+function openCheckoutModal(acc: any) {
+  selectedAccessory.value = { ...acc }
+  isCheckoutModalOpen.value = true
 }
 
-async function handleUninstall(comp: any) {
-  try {
-    const data = await api<{ success: boolean; message: string }>(`/api/components/${comp.id}/uninstall`, {
-      method: 'POST'
-    })
-    if (data.success) {
-      notifySuccess('Thành công', data.message)
-      fetchComponents()
-    }
-  } catch (err: any) {
-    notifyError('Lỗi', err.data?.message || 'Lỗi khi tháo linh kiện')
-  }
-}
-
-async function handleDelete(comp: any) {
-  if (!confirm(`Bạn có chắc chắn muốn xóa linh kiện "${comp.name}"?`)) return
+async function handleDelete(acc: any) {
+  if (!confirm(`Bạn có chắc chắn muốn xóa phụ kiện "${acc.name}"?`)) return
 
   try {
-    const data = await api<{ success: boolean }>(`/api/components/${comp.id}`, {
+    const data = await api<{ success: boolean }>(`/api/accessories/${acc.id}`, {
       method: 'DELETE'
     })
     if (data.success) {
-      notifySuccess('Thành công', 'Linh kiện đã được xóa')
-      fetchComponents()
+      notifySuccess('Thành công', 'Phụ kiện đã được xóa')
+      fetchAccessories()
     }
   } catch (err: any) {
-    notifyError('Lỗi', err.data?.message || 'Lỗi khi xóa linh kiện')
+    notifyError('Lỗi', err.data?.message || 'Lỗi khi xóa phụ kiện')
   }
+}
+
+function goToDetail(id: string) {
+  router.push(`/accessories/${id}`)
 }
 
 function closeModals() {
   isAddModalOpen.value = false
   isEditModalOpen.value = false
-  isInstallModalOpen.value = false
-  selectedComponent.value = null
+  isCheckoutModalOpen.value = false
+  selectedAccessory.value = null
 }
 
 onMounted(() => {
-  fetchComponents()
+  fetchAccessories()
 })
 
-const getStatusLabel = (status: string) => {
-  const labels: Record<string, string> = {
-    AVAILABLE: 'Sẵn sàng',
-    INSTALLED: 'Đã lắp đặt',
-    DEFECTIVE: 'Hỏng',
-    DISPOSED: 'Đã thanh lý'
-  }
-  return labels[status] || status
+function formatVND(value: number | null) {
+  if (!value) return '—'
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
 }
 </script>
 
@@ -100,61 +86,61 @@ const getStatusLabel = (status: string) => {
   <div class="page-container fade-in">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Quản lý linh kiện</h1>
-        <p class="page-subtitle">Theo dõi RAM, ổ cứng, card và các linh kiện phần cứng</p>
+        <h1 class="page-title">Quản lý phụ kiện</h1>
+        <p class="page-subtitle">Quản lý chuột, bàn phím, cáp sạc và các phụ kiện văn phòng</p>
       </div>
 
-      <AppButton label="Thêm linh kiện" variant="primary" @click="isAddModalOpen = true" />
+      <AppButton label="Thêm phụ kiện" variant="primary" @click="isAddModalOpen = true" />
     </div>
 
-    <div v-if="loading && components.length === 0" class="loading-container">
+    <div v-if="loading && accessories.length === 0" class="loading-container">
       <div class="spinner-simple"></div>
-      <p>Đang tải danh sách linh kiện...</p>
+      <p>Đang tải danh sách phụ kiện...</p>
     </div>
 
-    <div v-else-if="components.length > 0" class="table-container fade-in">
+    <div v-else-if="accessories.length > 0" class="table-container fade-in">
       <table class="app-table">
         <thead>
           <tr>
-            <th>Tên linh kiện</th>
-            <th>Số Serial</th>
+            <th>Tên phụ kiện</th>
             <th>Danh mục</th>
             <th>Hãng SX</th>
-            <th>Trạng thái</th>
-            <th>Thiết bị mẹ</th>
+            <th class="text-center">Tổng SL</th>
+            <th class="text-center">Khả dụng</th>
+            <th class="text-center">Đã cấp</th>
+            <th>Đơn giá</th>
             <th class="text-right">Hành động</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="comp in components" :key="comp.id">
+          <tr v-for="acc in accessories" :key="acc.id" @click="goToDetail(acc.id)" class="clickable-row">
             <td>
               <div class="item-info">
-                <span class="item-name font-bold">{{ comp.name }}</span>
-                <span class="item-id">{{ comp.id }}</span>
+                <span class="item-name font-bold">{{ acc.name }}</span>
+                <span class="item-id">{{ acc.id }}</span>
               </div>
             </td>
-            <td>{{ comp.serialNumber || '—' }}</td>
             <td>
-              <span class="category-tag">{{ comp.category?.name }}</span>
+              <span class="category-tag">{{ acc.category?.name }}</span>
             </td>
-            <td>{{ comp.manufacturer || '—' }}</td>
-            <td>
-              <span :class="['status-badge', `status-${comp.status.toLowerCase()}`]">
-                {{ getStatusLabel(comp.status) }}
+            <td>{{ acc.manufacturer || '—' }}</td>
+            <td class="text-center">
+              <span class="qty-badge">{{ acc.totalQuantity }}</span>
+            </td>
+            <td class="text-center">
+              <span :class="['qty-badge', acc.availableQuantity <= (acc.minQuantity || 0) ? 'qty-low' : 'qty-ok']">
+                {{ acc.availableQuantity }}
               </span>
             </td>
-            <td>
-              <span v-if="comp.device" class="device-link">
-                {{ comp.device.name }}
-              </span>
-              <span v-else class="text-muted">—</span>
+            <td class="text-center">
+              <span class="qty-badge qty-out">{{ acc.checkedOutQuantity }}</span>
             </td>
+            <td>{{ formatVND(acc.unitPrice) }}</td>
             <td>
               <div class="flex justify-end gap-2">
-                <button v-if="comp.status === 'AVAILABLE'" class="action-btn-accent" @click="openInstallModal(comp)">Lắp đặt</button>
-                <button v-if="comp.status === 'INSTALLED'" class="action-btn-accent" @click="handleUninstall(comp)">Tháo ra</button>
-                <button class="action-btn" @click="openEditModal(comp)">Sửa</button>
-                <button class="action-btn btn-delete" @click="handleDelete(comp)">Xóa</button>
+                <button v-if="acc.availableQuantity > 0" class="action-btn-accent" @click.stop="openCheckoutModal(acc)">Cấp phát</button>
+                <button class="action-btn" @click.stop="openEditModal(acc)">Sửa</button>
+                <button class="action-btn btn-delete" @click.stop="handleDelete(acc)">Xóa</button>
               </div>
             </td>
           </tr>
@@ -165,23 +151,24 @@ const getStatusLabel = (status: string) => {
     <div v-else class="empty-state">
       <div class="empty-state-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="4" y="4" width="16" height="16" rx="2" />
-          <path d="M9 9h6M9 13h6M9 17h4" />
+          <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+          <line x1="12" y1="22.08" x2="12" y2="12" />
         </svg>
       </div>
-      <h3 class="empty-state-title">Chưa có linh kiện nào</h3>
-      <p class="empty-state-desc">Hãy bắt đầu bằng cách thêm linh kiện mới vào kho.</p>
+      <h3 class="empty-state-title">Chưa có phụ kiện nào</h3>
+      <p class="empty-state-desc">Hãy bắt đầu bằng cách thêm phụ kiện mới vào kho.</p>
 
       <div class="mt-6">
-        <AppButton label="Thêm linh kiện đầu tiên" variant="secondary" @click="isAddModalOpen = true" />
+        <AppButton label="Thêm phụ kiện đầu tiên" variant="secondary" @click="isAddModalOpen = true" />
       </div>
     </div>
 
     <!-- Modals -->
-    <ComponentModal v-model="isAddModalOpen" @save="onSave" />
-    <ComponentModal v-model="isEditModalOpen" :component="selectedComponent" @save="onSave"
+    <AccessoryModal v-model="isAddModalOpen" @save="onSave" />
+    <AccessoryModal v-model="isEditModalOpen" :accessory="selectedAccessory" @save="onSave"
       @update:model-value="val => !val && closeModals()" />
-    <InstallComponentModal v-if="selectedComponent" v-model="isInstallModalOpen" :component="selectedComponent" @save="onSave"
+    <CheckoutAccessoryModal v-if="selectedAccessory" v-model="isCheckoutModalOpen" :accessory="selectedAccessory" @save="onSave"
       @update:model-value="val => !val && closeModals()" />
   </div>
 </template>
@@ -266,7 +253,14 @@ const getStatusLabel = (status: string) => {
 }
 .app-table td { padding: 16px 20px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
 .app-table tr:last-child td { border-bottom: none; }
-.app-table tr:hover { background: rgba(255, 255, 255, 0.01); }
+.app-table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
 
 .item-info { display: flex; flex-direction: column; gap: 2px; }
 .item-name { color: var(--color-text-primary); font-size: var(--font-size-sm); font-weight: 600; }
@@ -282,24 +276,20 @@ const getStatusLabel = (status: string) => {
   border: 1px solid var(--color-border);
 }
 
-.device-link {
-  color: var(--color-accent);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-}
-
-.status-badge {
+/* Quantity badges */
+.qty-badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  justify-content: center;
+  min-width: 28px;
+  padding: 2px 8px;
   border-radius: var(--radius-full);
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-sm);
   font-weight: 600;
 }
-.status-available { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
-.status-installed { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
-.status-defective { background: rgba(239, 68, 68, 0.1); color: #fca5a5; }
-.status-disposed { background: rgba(107, 114, 128, 0.1); color: #9ca3af; }
+.qty-ok { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+.qty-low { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.qty-out { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
 
 .action-btn {
   padding: 6px 14px;

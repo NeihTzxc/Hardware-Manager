@@ -136,3 +136,5 @@ docker build -t hardware-manager:dev -f docker/Dockerfile.dev .
 # Build Production image
 docker build -t hardware-manager:prod -f docker/Dockerfile .
 ```
+# How to seed the database
+npx tsx prisma/seed.ts

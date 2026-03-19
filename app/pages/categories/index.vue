@@ -7,6 +7,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
+const router = useRouter()
 const api = useApi()
 const { success, error: notifyError } = useNotification()
 const isAddModalOpen = ref(false)
@@ -49,6 +50,10 @@ function openEditModal(category: any) {
   isEditModalOpen.value = true
 }
 
+function goToDetail(id: string) {
+  router.push(`/categories/${id}`)
+}
+
 function closeModals() {
   isAddModalOpen.value = false
   isEditModalOpen.value = false
@@ -87,7 +92,7 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="cat in categories" :key="cat.id">
+          <tr v-for="cat in categories" :key="cat.id" @click="goToDetail(cat.id)" class="clickable-row">
             <td>
               <div class="category-info">
                 <span class="category-name font-bold">{{ cat.name }}</span>
@@ -102,8 +107,8 @@ onMounted(() => {
             </td>
             <td>
               <div class="flex justify-end gap-2">
-                <button class="action-btn" @click="openEditModal(cat)">Sửa</button>
-                <button class="action-btn btn-delete" @click="deleteCategory(cat.id)">Xóa</button>
+                <button class="action-btn" @click.stop="openEditModal(cat)">Sửa</button>
+                <button class="action-btn btn-delete" @click.stop="deleteCategory(cat.id)">Xóa</button>
               </div>
             </td>
           </tr>
@@ -265,7 +270,12 @@ onMounted(() => {
 }
 
 .app-table tr:hover {
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
 }
 
 /* Category Info */

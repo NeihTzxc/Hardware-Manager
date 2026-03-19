@@ -1,5 +1,6 @@
 import db from '../../utils/db'
 import bcrypt from 'bcryptjs'
+import { AuditAction, AuditEntity, logAudit } from '../../utils/audit'
 
 export default defineEventHandler(async (event) => {
     // Check auth and role
@@ -65,6 +66,14 @@ export default defineEventHandler(async (event) => {
             role: true,
             createdAt: true
         }
+    })
+
+    // Audit log
+    await logAudit(event, {
+        action: AuditAction.CREATE,
+        entity: AuditEntity.USER,
+        entityId: newUser.id,
+        details: newUser
     })
 
     return { success: true, data: newUser }

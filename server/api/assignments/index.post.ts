@@ -1,3 +1,5 @@
+import { AuditAction, AuditEntity, logAudit } from '../../utils/audit'
+
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
@@ -45,6 +47,14 @@ export default defineEventHandler(async (event) => {
             })
 
             return newAssignment
+        })
+
+        // Audit log
+        await logAudit(event, {
+            action: AuditAction.ASSIGN,
+            entity: AuditEntity.ASSIGNMENT,
+            entityId: assignment.id,
+            details: assignment
         })
 
         return {

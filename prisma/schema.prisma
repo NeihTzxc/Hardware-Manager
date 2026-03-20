@@ -69,6 +69,7 @@ model User {
   assignments        Assignment[]
   maintenances       MaintenanceLog[] @relation("PerformedBy")
   accessoryCheckouts AccessoryCheckout[]
+  auditLogs          AuditLog[]
 }
 
 model RefreshToken {
@@ -295,4 +296,18 @@ model AccessoryCheckout {
 
   @@index([accessoryId])
   @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // CREATE, UPDATE, DELETE, etc.
+  entity    String   // DEVICE, USER, etc.
+  entityId  String?
+  details   Json?
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
 }

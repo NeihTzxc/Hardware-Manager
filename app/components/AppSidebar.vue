@@ -45,6 +45,11 @@ const navItems = [
     to: '/print-templates',
   },
   {
+    label: 'Hạ tầng Web',
+    icon: 'domains',
+    to: '/domains',
+  },
+  {
     label: 'Cài đặt',
     icon: 'settings',
     to: '/settings',
@@ -188,6 +193,12 @@ function isActive(path: string) {
                 <polyline points="6 9 6 2 18 2 18 9" />
                 <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
                 <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              <!-- Web Infrastructure (globe) -->
+              <svg v-else-if="item.icon === 'domains'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
               </svg>
               <!-- Settings -->
               <svg v-else-if="item.icon === 'settings'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">

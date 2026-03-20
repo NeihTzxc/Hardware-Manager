@@ -21,7 +21,9 @@ export enum AuditEntity {
     ACCESSORY = 'ACCESSORY',
     SUPPLIER = 'SUPPLIER',
     LOCATION = 'LOCATION',
-    TEMPLATE = 'TEMPLATE'
+    TEMPLATE = 'TEMPLATE',
+    DOMAIN = 'DOMAIN',
+    SSL_CERTIFICATE = 'SSL_CERTIFICATE'
 }
 
 interface AuditLogOptions {

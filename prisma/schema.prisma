@@ -55,6 +55,20 @@ enum ComponentStatus {
   DISPOSED
 }
 
+enum DomainStatus {
+  ACTIVE
+  EXPIRED
+  PENDING
+  SUSPENDED
+}
+
+enum SslStatus {
+  VALID
+  EXPIRING_SOON
+  EXPIRED
+  REVOKED
+}
+
 // ==================== MODELS ====================
 
 model User {
@@ -310,4 +324,38 @@ model AuditLog {
 
   @@index([userId])
   @@index([entity, entityId])
+}
+
+model Domain {
+  id              String           @id // DOM- prefix
+  name            String           @unique
+  registrar       String?
+  registeredAt    DateTime?
+  expiresAt       DateTime?
+  autoRenew       Boolean          @default(false)
+  status          DomainStatus     @default(ACTIVE)
+  dnsProvider     String?
+  nameservers     String?
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  sslCertificates SslCertificate[]
+}
+
+model SslCertificate {
+  id         String    @id // SSL- prefix
+  domainId   String?
+  domain     Domain?   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  domainName String?
+  issuer     String?
+  type       String?
+  status     SslStatus @default(VALID)
+  issuedAt   DateTime?
+  expiresAt  DateTime?
+  autoRenew  Boolean   @default(false)
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([domainId])
 }

@@ -1,48 +1,50 @@
 <script setup lang="ts">
 import AppButton from '~/components/ui/AppButton.vue'
-import DomainModal from '~/components/modals/DomainModal.vue'
-import SslCertificateModal from '~/components/modals/SslCertificateModal.vue'
+import SoftwareModal from '~/components/modals/SoftwareModal.vue'
+import LicenseModal from '~/components/modals/LicenseModal.vue'
 
 definePageMeta({
   layout: 'dashboard',
   middleware: 'auth'
 })
 
+const router = useRouter()
 const api = useApi()
-const activeTab = ref<'domains' | 'ssl'>('domains')
+const activeTab = ref<'software' | 'licenses'>('software')
 const loading = ref(true)
 const searchQuery = ref('')
+const categoryFilter = ref('')
 const statusFilter = ref('')
 
-// Domain data
-const domains = ref<any[]>([])
-const isDomainModalOpen = ref(false)
-const selectedDomain = ref<any>(null)
+// Software data
+const softwareList = ref<any[]>([])
+const isSoftwareModalOpen = ref(false)
+const selectedSoftware = ref<any>(null)
 
-// SSL data
-const certificates = ref<any[]>([])
-const isSslModalOpen = ref(false)
-const selectedSsl = ref<any>(null)
+// License data
+const licenses = ref<any[]>([])
+const isLicenseModalOpen = ref(false)
+const selectedLicense = ref<any>(null)
 
 async function fetchData() {
   loading.value = true
   try {
-    if (activeTab.value === 'domains') {
-      const data = await api<{ success: boolean; domains: any[] }>('/api/domains', {
+    if (activeTab.value === 'software') {
+      const data = await api<{ success: boolean; software: any[] }>('/api/software', {
         params: { 
           q: searchQuery.value,
-          status: statusFilter.value
+          category: categoryFilter.value
         }
       })
-      domains.value = data.domains
+      softwareList.value = data.software
     } else {
-      const data = await api<{ success: boolean; certificates: any[] }>('/api/ssl-certificates', {
+      const data = await api<{ success: boolean; licenses: any[] }>('/api/licenses', {
         params: {
           q: searchQuery.value,
           status: statusFilter.value
         }
       })
-      certificates.value = data.certificates
+      licenses.value = data.licenses
     }
   } catch (err) {
     console.error('Fetch data error:', err)
@@ -51,44 +53,56 @@ async function fetchData() {
   }
 }
 
+function goToDetail(id: string) {
+  if (activeTab.value === 'software') {
+    router.push(`/software/${id}`)
+  } else {
+    const license = licenses.value.find(l => l.id === id)
+    if (license?.softwareId) {
+      router.push(`/software/${license.softwareId}`)
+    }
+  }
+}
+
 function openAddModal() {
-  if (activeTab.value === 'domains') {
-    selectedDomain.value = null
-    isDomainModalOpen.value = true
+  if (activeTab.value === 'software') {
+    selectedSoftware.value = null
+    isSoftwareModalOpen.value = true
   } else {
-    selectedSsl.value = null
-    isSslModalOpen.value = true
+    selectedLicense.value = null
+    isLicenseModalOpen.value = true
   }
 }
 
-function openEditDomain(domain: any) {
-  selectedDomain.value = domain
-  isDomainModalOpen.value = true
+function openEditSoftware(s: any) {
+  selectedSoftware.value = s
+  isSoftwareModalOpen.value = true
 }
 
-function openEditSsl(ssl: any) {
-  selectedSsl.value = ssl
-  isSslModalOpen.value = true
+function openEditLicense(l: any) {
+  selectedLicense.value = l
+  isLicenseModalOpen.value = true
 }
 
-const getStatusLabel = (status: string, type: 'domain' | 'ssl') => {
-  if (type === 'domain') {
-    const options: Record<string, string> = {
-      ACTIVE: 'Hoạt động',
-      EXPIRED: 'Hết hạn',
-      PENDING: 'Đang chờ',
-      SUSPENDED: 'Tạm ngưng'
-    }
-    return options[status] || status
-  } else {
-    const options: Record<string, string> = {
-      VALID: 'Hợp lệ',
-      EXPIRING_SOON: 'Sắp hết hạn',
-      EXPIRED: 'Hết hạn',
-      REVOKED: 'Đã thu hồi'
-    }
-    return options[status] || status
+const getStatusLabel = (status: string) => {
+  const options: Record<string, string> = {
+    ACTIVE: 'Đang sử dụng',
+    EXPIRED: 'Hết hạn',
+    REVOKED: 'Bị thu hồi',
+    UNUSED: 'Chưa dùng'
   }
+  return options[status] || status
+}
+
+const getLicenseTypeLabel = (type: string) => {
+  const options: Record<string, string> = {
+    PERPETUAL: 'Vĩnh viễn',
+    SUBSCRIPTION: 'Kỳ hạn',
+    OEM: 'OEM',
+    FREEWARE: 'Miễn phí',
+    OPEN_SOURCE: 'Nguồn mở'
+  }
+  return options[type] || type
 }
 
 const formatDate = (date: string | null) => {
@@ -107,7 +121,7 @@ const getExpiryClass = (date: string | null) => {
   return ''
 }
 
-watch([activeTab, searchQuery, statusFilter], () => {
+watch([activeTab, searchQuery, categoryFilter, statusFilter], () => {
   fetchData()
 })
 
@@ -120,10 +134,10 @@ onMounted(() => {
   <div class="page-container fade-in">
     <div class="page-header">
       <div>
-        <h1 class="page-title">Hạ tầng Web</h1>
-        <p class="page-subtitle">Quản lý tên miền và chứng chỉ bảo mật hệ thống.</p>
+        <h1 class="page-title">Phần mềm & License</h1>
+        <p class="page-subtitle">Quản lý danh sách phần mềm và bản quyền sử dụng.</p>
       </div>
-      <AppButton :label="activeTab === 'domains' ? 'Thêm Tên miền' : 'Thêm SSL'" variant="primary" @click="openAddModal">
+      <AppButton :label="activeTab === 'software' ? 'Thêm Phần mềm' : 'Thêm License'" variant="primary" @click="openAddModal">
         <template #icon>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -135,22 +149,22 @@ onMounted(() => {
     <!-- Tab Switcher -->
     <div class="tabs-nav shadow-sm mb-6">
       <button 
-        :class="['tab-link', { 'active': activeTab === 'domains' }]" 
-        @click="activeTab = 'domains'; searchQuery = ''; statusFilter = ''"
+        :class="['tab-link', { 'active': activeTab === 'software' }]" 
+        @click="activeTab = 'software'; searchQuery = ''; categoryFilter = ''; statusFilter = ''"
       >
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/>
         </svg>
-        Tên miền (Domains)
+        Danh sách phần mềm
       </button>
       <button 
-        :class="['tab-link', { 'active': activeTab === 'ssl' }]" 
-        @click="activeTab = 'ssl'; searchQuery = ''; statusFilter = ''"
+        :class="['tab-link', { 'active': activeTab === 'licenses' }]" 
+        @click="activeTab = 'licenses'; searchQuery = ''; categoryFilter = ''; statusFilter = ''"
       >
         <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
         </svg>
-        Chứng chỉ SSL (Certificates)
+        Quản lý Giấy phép (Licenses)
       </button>
     </div>
 
@@ -163,90 +177,79 @@ onMounted(() => {
         <input 
           v-model="searchQuery" 
           type="text" 
-          :placeholder="activeTab === 'domains' ? 'Tìm tên miền...' : 'Tìm domain, issuer...'" 
+          :placeholder="activeTab === 'software' ? 'Tìm tên phần mềm, nhà cung cấp...' : 'Tìm license key, người được gán...'" 
           class="search-input"
         />
       </div>
       
       <div class="filter-group">
-        <select v-model="statusFilter" class="custom-select">
+        <select v-if="activeTab === 'licenses'" v-model="statusFilter" class="custom-select">
           <option value="">Tất cả trạng thái</option>
-          <template v-if="activeTab === 'domains'">
-            <option value="ACTIVE">Hoạt động</option>
-            <option value="EXPIRED">Hết hạn</option>
-            <option value="PENDING">Đang chờ</option>
-            <option value="SUSPENDED">Tạm ngưng</option>
-          </template>
-          <template v-else>
-            <option value="VALID">Hợp lệ</option>
-            <option value="EXPIRING_SOON">Sắp hết hạn</option>
-            <option value="EXPIRED">Đã hết hạn</option>
-            <option value="REVOKED">Đã bị thu hồi</option>
-          </template>
+          <option value="ACTIVE">Đang sử dụng</option>
+          <option value="EXPIRED">Đã hết hạn</option>
+          <option value="REVOKED">Bị thu hồi</option>
+          <option value="UNUSED">Chưa dùng</option>
         </select>
+        <input 
+          v-else 
+          v-model="categoryFilter" 
+          type="text" 
+          placeholder="Lọc danh mục..." 
+          class="search-input"
+          style="width: 200px;"
+        />
       </div>
     </div>
 
     <!-- Loading -->
-    <div v-if="loading && domains.length === 0 && certificates.length === 0" class="loading-container">
+    <div v-if="loading && softwareList.length === 0 && licenses.length === 0" class="loading-container">
       <div class="spinner-simple"></div>
       <p>Đang tải dữ liệu...</p>
     </div>
 
-    <!-- Domain Tab Content -->
-    <div v-else-if="activeTab === 'domains'">
-      <div v-if="domains.length === 0" class="empty-state">
+    <!-- Software Tab Content -->
+    <div v-else-if="activeTab === 'software'">
+      <div v-if="softwareList.length === 0" class="empty-state">
         <div class="empty-state-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
           </svg>
         </div>
-        <h3 class="empty-state-title">Không tìm thấy tên miền nào</h3>
-        <AppButton label="Thêm Tên miền mới" variant="secondary" class="mt-4" @click="openAddModal" />
+        <h3 class="empty-state-title">Chưa có phần mềm nào</h3>
+        <AppButton label="Thêm phần mềm mới" variant="secondary" class="mt-4" @click="openAddModal" />
       </div>
 
       <div v-else class="table-container fade-in">
         <table class="app-table">
           <thead>
             <tr>
-              <th>Tên miền</th>
-              <th>Nhà đăng ký</th>
-              <th>Ngày hết hạn</th>
-              <th>Gia hạn</th>
-              <th>SSL</th>
-              <th>Trạng thái</th>
+              <th>Tên phần mềm</th>
+              <th>Nhà cung cấp</th>
+              <th>Phiên bản</th>
+              <th>Danh mục</th>
+              <th>Số License</th>
               <th class="text-right">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="domain in domains" :key="domain.id" @click="$router.push(`/domains/${domain.id}`)" class="clickable-row">
+            <tr v-for="s in softwareList" :key="s.id" @click="goToDetail(s.id)" class="clickable-row">
               <td>
                 <div class="info-cell">
-                  <span class="info-primary">{{ domain.name }}</span>
-                  <span class="info-secondary">{{ domain.id }}</span>
+                  <span class="info-primary">{{ s.name }}</span>
+                  <span class="info-secondary">{{ s.id }}</span>
                 </div>
               </td>
-              <td><span class="text-secondary text-sm">{{ domain.registrar || '—' }}</span></td>
+              <td><span class="text-secondary">{{ s.vendor || '—' }}</span></td>
+              <td><span class="text-primary font-bold">{{ s.version || '—' }}</span></td>
+              <td><span class="category-tag">{{ s.category || '—' }}</span></td>
               <td>
-                <span :class="['text-sm', getExpiryClass(domain.expiresAt)]">
-                  {{ formatDate(domain.expiresAt) }}
-                </span>
-              </td>
-              <td>
-                <span v-if="domain.autoRenew" class="compact-tag text-green-400">Tự động</span>
-                <span v-else class="compact-tag text-muted">Thủ công</span>
-              </td>
-              <td>
-                <span class="count-tag">{{ domain._count?.sslCertificates || 0 }}</span>
-              </td>
-              <td>
-                <span :class="['status-badge', `status-${domain.status.toLowerCase()}`]">
-                  {{ getStatusLabel(domain.status, 'domain') }}
+                <span class="license-count-badge">
+                  {{ s._count?.licenses || 0 }} License
                 </span>
               </td>
               <td @click.stop>
                 <div class="flex justify-end gap-2">
-                  <button class="action-btn" @click="openEditDomain(domain)">Sửa</button>
+                  <button class="action-btn" title="Sửa" @click="openEditSoftware(s)">Sửa</button>
                 </div>
               </td>
             </tr>
@@ -255,58 +258,60 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- SSL Tab Content -->
-    <div v-else-if="activeTab === 'ssl'">
-      <div v-if="certificates.length === 0" class="empty-state">
+    <!-- Licenses Tab Content -->
+    <div v-else-if="activeTab === 'licenses'">
+      <div v-if="licenses.length === 0" class="empty-state">
         <div class="empty-state-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
           </svg>
         </div>
-        <h3 class="empty-state-title">Không tìm thấy chứng chỉ SSL nào</h3>
-        <AppButton label="Thêm SSL mới" variant="secondary" class="mt-4" @click="openAddModal" />
+        <h3 class="empty-state-title">Chưa có license nào</h3>
+        <AppButton label="Thêm License mới" variant="secondary" class="mt-4" @click="openAddModal" />
       </div>
 
       <div v-else class="table-container fade-in">
         <table class="app-table">
           <thead>
             <tr>
-              <th>Tên miền</th>
-              <th>Nhà cấp phát</th>
+              <th>License Key / ID</th>
+              <th>Phần mềm</th>
               <th>Loại</th>
-              <th>Ngày hết hạn</th>
-              <th>Gia hạn</th>
               <th>Trạng thái</th>
+              <th>Gán cho / Seats</th>
+              <th>Hết hạn</th>
               <th class="text-right">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="ssl in certificates" :key="ssl.id" class="clickable-row">
+            <tr v-for="l in licenses" :key="l.id" class="clickable-row">
               <td>
                 <div class="info-cell">
-                  <span class="info-primary">{{ ssl.domainName }}</span>
-                  <span class="info-secondary">{{ ssl.id }}</span>
+                  <span class="info-primary font-mono text-xs">{{ l.licenseKey || '—' }}</span>
+                  <span class="info-secondary">{{ l.id }}</span>
                 </div>
               </td>
-              <td><span class="text-secondary text-sm">{{ ssl.issuer || '—' }}</span></td>
-              <td><span class="text-muted text-xs font-bold">{{ ssl.type || 'DV' }}</span></td>
+              <td><span class="text-primary font-bold">{{ l.software?.name }}</span></td>
+              <td><span class="text-secondary text-xs">{{ getLicenseTypeLabel(l.type) }}</span></td>
               <td>
-                <span :class="['text-sm', getExpiryClass(ssl.expiresAt)]">
-                  {{ formatDate(ssl.expiresAt) }}
+                <span :class="['status-badge', `status-${l.status.toLowerCase().replace('_', '-')}`]">
+                  {{ getStatusLabel(l.status) }}
                 </span>
               </td>
               <td>
-                <span v-if="ssl.autoRenew" class="compact-tag text-green-400">Tự động</span>
-                <span v-else class="compact-tag text-muted">Thủ công</span>
+                <div class="flex flex-col">
+                  <span class="font-medium text-sm">{{ l.assignedTo || 'Chưa gán' }}</span>
+                  <span class="text-xs text-muted">{{ l.seats }} Seats</span>
+                </div>
               </td>
               <td>
-                <span :class="['status-badge', `status-${ssl.status.toLowerCase().replace('_', '-')}`]">
-                  {{ getStatusLabel(ssl.status, 'ssl') }}
+                <span :class="getExpiryClass(l.expiresAt)" class="text-xs">
+                  {{ formatDate(l.expiresAt) }}
                 </span>
               </td>
               <td @click.stop>
                 <div class="flex justify-end gap-2">
-                  <button class="action-btn" @click="openEditSsl(ssl)">Sửa</button>
+                  <button class="action-btn" @click="openEditLicense(l)">Sửa</button>
                 </div>
               </td>
             </tr>
@@ -316,14 +321,14 @@ onMounted(() => {
     </div>
 
     <!-- Modals -->
-    <DomainModal 
-      v-model="isDomainModalOpen" 
-      :domain="selectedDomain" 
+    <SoftwareModal 
+      v-model="isSoftwareModalOpen" 
+      :software="selectedSoftware" 
       @save="fetchData" 
     />
-    <SslCertificateModal 
-      v-model="isSslModalOpen" 
-      :certificate="selectedSsl" 
+    <LicenseModal 
+      v-model="isLicenseModalOpen" 
+      :license="selectedLicense" 
       @save="fetchData" 
     />
   </div>
@@ -527,7 +532,26 @@ onMounted(() => {
   font-family: monospace;
 }
 
-/* Status Badges */
+/* Common UI Elements */
+.category-tag {
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+}
+
+.license-count-badge {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--color-accent);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -537,12 +561,11 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.status-active, .status-valid { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+.status-active { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
 .status-expired { background: rgba(239, 68, 68, 0.1); color: #fca5a5; }
-.status-pending, .status-expiring-soon { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
-.status-suspended, .status-revoked { background: rgba(107, 114, 128, 0.1); color: #9ca3af; }
+.status-revoked { background: rgba(107, 114, 128, 0.1); color: #9ca3af; }
+.status-unused { background: rgba(147, 51, 234, 0.1); color: #c084fc; }
 
-/* Action Buttons */
 .action-btn {
   padding: 6px 14px;
   border-radius: var(--radius-md);
@@ -559,22 +582,6 @@ onMounted(() => {
   background: var(--color-surface-hover);
   color: var(--color-text-primary);
   border-color: var(--color-text-muted);
-}
-
-/* Common Tags */
-.compact-tag {
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.count-tag {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  padding: 2px 8px;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
 }
 
 /* Empty State */

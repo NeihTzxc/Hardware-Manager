@@ -69,6 +69,21 @@ enum SslStatus {
   REVOKED
 }
 
+enum LicenseType {
+  PERPETUAL
+  SUBSCRIPTION
+  OEM
+  FREEWARE
+  OPEN_SOURCE
+}
+
+enum LicenseStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  UNUSED
+}
+
 // ==================== MODELS ====================
 
 model User {
@@ -358,4 +373,36 @@ model SslCertificate {
   updatedAt  DateTime  @updatedAt
 
   @@index([domainId])
+}
+
+model Software {
+  id        String    @id // SFT- prefix
+  name      String    @unique
+  vendor    String?
+  version   String?
+  category  String?
+  website   String?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  licenses  License[]
+}
+
+model License {
+  id          String        @id // LIC- prefix
+  softwareId  String
+  software    Software      @relation(fields: [softwareId], references: [id], onDelete: Cascade)
+  licenseKey  String?
+  type        LicenseType   @default(SUBSCRIPTION)
+  status      LicenseStatus @default(ACTIVE)
+  seats       Int           @default(1)
+  assignedTo  String?
+  purchasedAt DateTime?
+  expiresAt   DateTime?
+  cost        Float?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([softwareId])
 }

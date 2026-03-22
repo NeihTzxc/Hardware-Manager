@@ -406,3 +406,12 @@ model License {
 
   @@index([softwareId])
 }
+
+// ==================== SYSTEM SETTINGS ====================
+
+model SystemSetting {
+  key       String   @id // e.g. ALERT_EMAIL, ALERT_SLACK, ALERT_TELEGRAM
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

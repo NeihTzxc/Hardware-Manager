@@ -6,6 +6,7 @@ import AppFormControl from '~/components/ui/AppFormControl.vue'
 const api = useApi()
 
 const loading = ref(false)
+const testLoading = ref({ email: false, slack: false, telegram: false })
 const notificationMsg = ref<{ type: 'success' | 'error', text: string } | null>(null)
 
 const form = ref({
@@ -40,10 +41,33 @@ const saveSettings = async () => {
   }
 }
 
+const testAlert = async (type: 'email' | 'slack' | 'telegram') => {
+  testLoading.value[type] = true
+  notificationMsg.value = null
+  try {
+    const config = form.value[type]
+    const data = await api<any>('/api/settings/alerts/test', {
+      method: 'POST',
+      body: { type, config }
+    })
+    notificationMsg.value = { type: 'success', text: `Gửi thử ${type} thành công! Vui lòng kiểm tra tin nhắn.` }
+    setTimeout(() => notificationMsg.value = null, 5000)
+  } catch (error: any) {
+    console.error(`Lỗi test ${type}:`, error)
+    notificationMsg.value = { 
+      type: 'error', 
+      text: error.data?.statusMessage || `Lỗi khi kiểm tra kết nối ${type}.` 
+    }
+  } finally {
+    testLoading.value[type] = false
+  }
+}
+
 onMounted(() => {
   fetchSettings()
 })
 </script>
+
 
 <template>
   <div class="alerts-container fade-in">
@@ -96,6 +120,17 @@ onMounted(() => {
           <AppFormControl label="Sender Name/Email (From)" class="col-span-full">
             <input v-model="form.email.from" type="text" placeholder="Hardware Alerts <alert@yourdomain.com>" />
           </AppFormControl>
+
+          <div class="col-span-full flex justify-end mt-2">
+            <AppButton 
+              label="Kiểm tra kết nối Email" 
+              variant="secondary" 
+              icon="pi pi-send" 
+              size="sm"
+              :loading="testLoading.email"
+              @click="testAlert('email')" 
+            />
+          </div>
         </div>
         <div v-else class="empty-state-text">Gửi thông báo qua Email đang tắt. Bật lên để cấu hình.</div>
       </div>
@@ -117,6 +152,17 @@ onMounted(() => {
           <AppFormControl label="Webhook URL" class="col-span-full">
             <input v-model="form.slack.webhookUrl" type="text" placeholder="https://hooks.slack.com/services/..." />
           </AppFormControl>
+
+          <div class="col-span-full flex justify-end mt-2">
+            <AppButton 
+              label="Kiểm tra kết nối Slack" 
+              variant="secondary" 
+              icon="pi pi-send" 
+              size="sm"
+              :loading="testLoading.slack"
+              @click="testAlert('slack')" 
+            />
+          </div>
         </div>
         <div v-else class="empty-state-text">Gửi thông báo qua Slack đang tắt. Bật lên để cấu hình.</div>
       </div>
@@ -141,9 +187,21 @@ onMounted(() => {
           <AppFormControl label="Chat ID / Group ID" class="col-span-full">
             <input v-model="form.telegram.chatId" type="text" placeholder="-1001234567890" />
           </AppFormControl>
+
+          <div class="col-span-full flex justify-end mt-2">
+            <AppButton 
+              label="Kiểm tra kết nối Telegram" 
+              variant="secondary" 
+              icon="pi pi-send" 
+              size="sm"
+              :loading="testLoading.telegram"
+              @click="testAlert('telegram')" 
+            />
+          </div>
         </div>
         <div v-else class="empty-state-text">Gửi thông báo qua Telegram đang tắt. Bật lên để cấu hình.</div>
       </div>
+
     </div>
   </div>
 </template>

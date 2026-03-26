@@ -24,7 +24,8 @@ const isBorrowModalOpen = ref(false)
 const tabs = [
   { id: 'assignments', label: 'Lịch sử cấp phát', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
   { id: 'maintenance', label: 'Bảo trì', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>' },
-  { id: 'components', label: 'Linh kiện', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' }
+  { id: 'components', label: 'Linh kiện', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
+  { id: 'history', label: 'Lịch sử chỉnh sửa', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' }
 ]
 
 async function fetchDevice() {
@@ -41,6 +42,46 @@ async function fetchDevice() {
 
 function onDeviceSave() {
   fetchDevice()
+  auditLogs.value = [] // Reset logs to force refetch
+  if (activeTab.value === 'history') {
+    fetchAuditLogs()
+  }
+}
+
+const auditLogs = ref<any[]>([])
+const loadingLogs = ref(false)
+
+async function fetchAuditLogs() {
+  if (auditLogs.value.length > 0) return
+  loadingLogs.value = true
+  try {
+    const data = await api<{ success: boolean; logs: any[] }>('/api/audit-logs', {
+      params: { entity: 'DEVICE', entityId: id, limit: 50 }
+    })
+    auditLogs.value = data.logs
+  } catch (err) {
+    console.error('Fetch audit logs error:', err)
+  } finally {
+    loadingLogs.value = false
+  }
+}
+
+watch(activeTab, (newTab) => {
+  if (newTab === 'history') {
+    fetchAuditLogs()
+  }
+})
+
+const getActionLabel = (action: string) => {
+  const options: Record<string, string> = {
+    CREATE: 'Tạo mới',
+    UPDATE: 'Cập nhật',
+    DELETE: 'Xóa',
+    ASSIGN: 'Bàn giao',
+    RETURN: 'Thu hồi',
+    MAINTENANCE: 'Bảo trì'
+  }
+  return options[action] || action
 }
 
 const getStatusLabel = (status: string) => {
@@ -67,7 +108,10 @@ const getConditionLabel = (condition: string) => {
 
 const formatDate = (date: string | null) => {
   if (!date) return '—'
-  return new Date(date).toLocaleDateString('vi-VN')
+  return new Date(date).toLocaleString('vi-VN', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  })
 }
 
 const formatCurrency = (amount: number | null) => {
@@ -253,6 +297,52 @@ onMounted(() => {
                   <span :class="['status-badge status-sm', `status-${comp.status.toLowerCase()}`]">
                     {{ comp.status }}
                   </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Edit History List -->
+            <div v-if="activeTab === 'history'" class="history-content">
+              <div v-if="loadingLogs" class="loading-state h-48 py-8">
+                <div class="spinner-simple"></div>
+              </div>
+              <div v-else-if="auditLogs.length === 0" class="empty-history">
+                Không có lịch sử chỉnh sửa hoặc hoạt động liên quan.
+              </div>
+              <div v-else class="timeline">
+                <div v-for="log in auditLogs" :key="log.id" class="timeline-item">
+                  <div class="timeline-dot" :class="{ 'active': log.action === 'CREATE' }"></div>
+                  <div class="timeline-body">
+                    <div class="flex justify-between items-start">
+                      <span class="user-name">{{ log.user?.name || log.user?.email || 'Hệ thống' }}</span>
+                      <span :class="['action-badge', `action-${log.action.toLowerCase()}`]">
+                        {{ getActionLabel(log.action) }}
+                      </span>
+                    </div>
+                    <div class="timeline-dates mb-2">
+                       {{ formatDate(log.createdAt) }}
+                    </div>
+                    <div v-if="log.action === 'UPDATE' && log.details?.new" class="timeline-notes text-xs">
+                       <p class="font-bold mb-1 border-b border-white/10 pb-1">Chi tiết thay đổi:</p>
+                       <ul class="list-disc pl-4 space-y-1 mt-1">
+                         <li v-if="log.details.old.name !== log.details.new.name">Tên: <span class="line-through opacity-50">{{ log.details.old.name }}</span> → <span class="text-accent">{{ log.details.new.name }}</span></li>
+                         <li v-if="log.details.old.status !== log.details.new.status">Trạng thái: <span class="line-through opacity-50">{{ getStatusLabel(log.details.old.status) }}</span> → <span class="text-accent">{{ getStatusLabel(log.details.new.status) }}</span></li>
+                         <li v-if="log.details.old.condition !== log.details.new.condition">Tình trạng: <span class="line-through opacity-50">{{ getConditionLabel(log.details.old.condition) }}</span> → <span class="text-accent">{{ getConditionLabel(log.details.new.condition) }}</span></li>
+                         <li v-if="log.details.old.serialNumber !== log.details.new.serialNumber">Serial: <span class="line-through opacity-50">{{ log.details.old.serialNumber }}</span> → <span class="text-accent">{{ log.details.new.serialNumber }}</span></li>
+                         <li v-if="log.details.old.notes !== log.details.new.notes">Ghi chú đã được cập nhật</li>
+                         <template v-if="log.details.old.name === log.details.new.name &&
+                                         log.details.old.status === log.details.new.status &&
+                                         log.details.old.condition === log.details.new.condition &&
+                                         log.details.old.serialNumber === log.details.new.serialNumber &&
+                                         log.details.old.notes === log.details.new.notes">
+                           <li class="italic text-muted list-none -ml-4">Cập nhật thông tin chi tiết</li>
+                         </template>
+                       </ul>
+                    </div>
+                    <div v-else-if="log.action === 'CREATE'" class="timeline-notes text-xs">
+                      Đã thêm thiết bị vào hệ thống.
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -640,6 +730,25 @@ onMounted(() => {
 .status-maintenance { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
 .status-retired { background: rgba(107, 114, 128, 0.1); color: #9ca3af; }
 .status-lost { background: rgba(239, 68, 68, 0.1); color: #fca5a5; }
+
+/* Action Badges for history */
+.action-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-md);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.action-create { background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+.action-update { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+.action-delete { background: rgba(239, 68, 68, 0.1); color: #fca5a5; }
+.action-assign { background: rgba(168, 85, 247, 0.1); color: #c084fc; }
+.action-return { background: rgba(20, 184, 166, 0.1); color: #2dd4bf; }
+.action-maintenance { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
 
 /* States */
 .loading-state {

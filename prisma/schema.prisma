@@ -55,6 +55,35 @@ enum ComponentStatus {
   DISPOSED
 }
 
+enum DomainStatus {
+  ACTIVE
+  EXPIRED
+  PENDING
+  SUSPENDED
+}
+
+enum SslStatus {
+  VALID
+  EXPIRING_SOON
+  EXPIRED
+  REVOKED
+}
+
+enum LicenseType {
+  PERPETUAL
+  SUBSCRIPTION
+  OEM
+  FREEWARE
+  OPEN_SOURCE
+}
+
+enum LicenseStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  UNUSED
+}
+
 // ==================== MODELS ====================
 
 model User {
@@ -69,6 +98,7 @@ model User {
   assignments        Assignment[]
   maintenances       MaintenanceLog[] @relation("PerformedBy")
   accessoryCheckouts AccessoryCheckout[]
+  auditLogs          AuditLog[]
 }
 
 model RefreshToken {
@@ -295,4 +325,93 @@ model AccessoryCheckout {
 
   @@index([accessoryId])
   @@index([userId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String   // CREATE, UPDATE, DELETE, etc.
+  entity    String   // DEVICE, USER, etc.
+  entityId  String?
+  details   Json?
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+}
+
+model Domain {
+  id              String           @id // DOM- prefix
+  name            String           @unique
+  registrar       String?
+  registeredAt    DateTime?
+  expiresAt       DateTime?
+  autoRenew       Boolean          @default(false)
+  status          DomainStatus     @default(ACTIVE)
+  dnsProvider     String?
+  nameservers     String?
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  sslCertificates SslCertificate[]
+}
+
+model SslCertificate {
+  id         String    @id // SSL- prefix
+  domainId   String?
+  domain     Domain?   @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  domainName String?
+  issuer     String?
+  type       String?
+  status     SslStatus @default(VALID)
+  issuedAt   DateTime?
+  expiresAt  DateTime?
+  autoRenew  Boolean   @default(false)
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([domainId])
+}
+
+model Software {
+  id        String    @id // SFT- prefix
+  name      String    @unique
+  vendor    String?
+  version   String?
+  category  String?
+  website   String?
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  licenses  License[]
+}
+
+model License {
+  id          String        @id // LIC- prefix
+  softwareId  String
+  software    Software      @relation(fields: [softwareId], references: [id], onDelete: Cascade)
+  licenseKey  String?
+  type        LicenseType   @default(SUBSCRIPTION)
+  status      LicenseStatus @default(ACTIVE)
+  seats       Int           @default(1)
+  assignedTo  String?
+  purchasedAt DateTime?
+  expiresAt   DateTime?
+  cost        Float?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([softwareId])
+}
+
+// ==================== SYSTEM SETTINGS ====================
+
+model SystemSetting {
+  key       String   @id // e.g. ALERT_EMAIL, ALERT_SLACK, ALERT_TELEGRAM
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

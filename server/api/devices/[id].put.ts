@@ -1,3 +1,5 @@
+import { AuditAction, AuditEntity, logAudit } from '../../utils/audit'
+
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
     const body = await readBody(event)
@@ -56,6 +58,17 @@ export default defineEventHandler(async (event) => {
                 categoryId: body.categoryId,
                 status: body.status || device.status,
                 condition: body.condition || device.condition
+            }
+        })
+
+        // Audit log
+        await logAudit(event, {
+            action: AuditAction.UPDATE,
+            entity: AuditEntity.DEVICE,
+            entityId: id,
+            details: {
+                old: device,
+                new: updatedDevice
             }
         })
 

@@ -1,3 +1,5 @@
+import { AuditAction, AuditEntity, logAudit } from '../../utils/audit'
+
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
@@ -34,6 +36,14 @@ export default defineEventHandler(async (event) => {
                 status: 'AVAILABLE',
                 condition: 'NEW'
             }
+        })
+
+        // Audit log
+        await logAudit(event, {
+            action: AuditAction.CREATE,
+            entity: AuditEntity.DEVICE,
+            entityId: device.id,
+            details: device
         })
 
         return {

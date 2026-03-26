@@ -1,3 +1,5 @@
+import { AuditAction, AuditEntity, logAudit } from '../../../utils/audit'
+
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
     const body = await readBody(event)
@@ -48,6 +50,17 @@ export default defineEventHandler(async (event) => {
             })
 
             return updated
+        })
+
+        // Audit log
+        await logAudit(event, {
+            action: AuditAction.RETURN,
+            entity: AuditEntity.ASSIGNMENT,
+            entityId: id,
+            details: {
+                old: assignment,
+                new: updatedAssignment
+            }
         })
 
         return {

@@ -5,7 +5,7 @@ interface JwtUserPayload {
     email: string
 }
 
-const ACCESS_TOKEN_EXPIRY = '15m'
+const ACCESS_TOKEN_EXPIRY = '1m'
 const REFRESH_TOKEN_EXPIRY = '7d'
 
 function getSecrets() {
@@ -55,7 +55,7 @@ export const ACCESS_COOKIE_OPTIONS = {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax' as const,
     path: '/',
-    maxAge: 15 * 60, // 15 minutes in seconds
+    maxAge: 60, // 1 minute in seconds
 }
 
 /** Cookie options for refresh token */

@@ -1,3 +1,6 @@
+// Shared promise for refresh token across all useApi calls
+let refreshTokenPromise: Promise<any> | null = null
+
 export const useApi = () => {
     // Get store inside to avoid circular dependencies during initialization
     const getAuthStore = () => useAuthStore()
@@ -24,15 +27,23 @@ export const useApi = () => {
             
             if (err.response?.status === 401 && !isAuthRoute) {
                 try {
-                    // Bước 1: Thử gọi API Refresh Token
-                    await $fetch('/api/auth/refresh', { 
-                        method: 'POST',
-                        headers: cookieHeaders as Record<string, string>
-                    })
+                    // Step 1: Thử gọi API Refresh Token (dùng promise chung để tránh race condition)
+                    if (!refreshTokenPromise) {
+                        refreshTokenPromise = $fetch('/api/auth/refresh', { 
+                            method: 'POST',
+                            headers: cookieHeaders as Record<string, string>
+                        }).finally(() => {
+                            refreshTokenPromise = null
+                        })
+                    }
+                    
+                    await refreshTokenPromise
 
-                    // Bước 2: Nếu refresh thành công, thực hiện lại request ban đầu
+                    // Step 2: Nếu refresh thành công, thực hiện lại request ban đầu
+                    // Cần lấy lại headers mới (quan trọng cho SSR)
+                    const currentHeaders = import.meta.server ? useRequestHeaders(['cookie']) : {}
                     const retryHeaders = {
-                        ...(cookieHeaders as Record<string, string>),
+                        ...(currentHeaders as Record<string, string>),
                         ...opts?.headers
                     }
                     return await $fetch(url, { ...opts, headers: retryHeaders }) as T

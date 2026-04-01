@@ -6,7 +6,8 @@ interface JwtUserPayload {
 }
 
 const ACCESS_TOKEN_EXPIRY = '15m'
-const REFRESH_TOKEN_EXPIRY = '7d'
+const REFRESH_TOKEN_EXPIRY = '30d'
+const REFRESH_TOKEN_MAX_AGE = 30 * 24 * 60 * 60 // 30 days in seconds
 
 function getSecrets() {
     const accessSecret = process.env.JWT_SECRET
@@ -64,10 +65,10 @@ export const REFRESH_COOKIE_OPTIONS = {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax' as const,
     path: '/',
-    maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+    maxAge: REFRESH_TOKEN_MAX_AGE,
 }
 
 /** Refresh token expiry as a Date (for DB storage) */
 export function getRefreshTokenExpiry(): Date {
-    return new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    return new Date(Date.now() + REFRESH_TOKEN_MAX_AGE * 1000)
 }

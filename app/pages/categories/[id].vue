@@ -205,7 +205,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.page-container { max-width: 1000px; }
+
 .detail-header { margin-bottom: var(--spacing-2xl); }
 .back-btn {
   width: 40px; height: 40px; border-radius: 12px;

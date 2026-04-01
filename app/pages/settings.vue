@@ -63,9 +63,7 @@ const tabs = [
 </template>
 
 <style scoped>
-.page-container {
-  max-width: 1200px;
-}
+
 .page-header {
   display: flex;
   align-items: center;

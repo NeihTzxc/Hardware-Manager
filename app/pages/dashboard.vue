@@ -145,9 +145,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.page-container {
-  max-width: 1200px;
-}
+
 
 .page-header {
   margin-bottom: var(--spacing-2xl);

@@ -140,7 +140,7 @@ const isFiltered = computed(() => {
 </script>
 
 <template>
-  <div class="page-container fade-in">
+  <div class="page-container wide fade-in">
     <div class="page-header">
       <div>
         <h1 class="page-title">Quản lý thiết bị</h1>
@@ -280,9 +280,6 @@ const isFiltered = computed(() => {
 </template>
 
 <style scoped>
-.page-container {
-  max-width: 1200px;
-}
 
 .page-header {
   display: flex;

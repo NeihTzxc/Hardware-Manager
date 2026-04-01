@@ -84,7 +84,7 @@ function formatVND(value: number | null) {
 </script>
 
 <template>
-  <div class="page-container fade-in">
+  <div class="page-container wide fade-in">
     <div class="page-header">
       <div>
         <h1 class="page-title">Quản lý phụ kiện</h1>
@@ -171,7 +171,6 @@ function formatVND(value: number | null) {
 </template>
 
 <style scoped>
-.page-container { max-width: 1200px; }
 
 .page-header {
   display: flex;

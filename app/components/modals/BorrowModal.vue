@@ -2,6 +2,7 @@
 import AppButton from '~/components/ui/AppButton.vue'
 import AppDialog from '~/components/ui/AppDialog.vue'
 import AppFormControl from '~/components/ui/AppFormControl.vue'
+import DeviceIcon from '~/components/ui/icons/DeviceIcon.vue'
 
 interface Props {
   modelValue: boolean
@@ -90,10 +91,7 @@ function resetForm() {
     <div class="space-y-4">
       <div v-if="device" class="device-preview p-3 bg-surface rounded-lg border border-border flex items-center gap-3">
         <div class="p-2 bg-accent/10 rounded">
-          <svg class="w-6 h-6 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="3" width="20" height="14" rx="2" />
-            <path d="M8 21h8M12 17v4" />
-          </svg>
+          <DeviceIcon class="w-6 h-6 text-accent" />
         </div>
         <div>
           <div class="font-bold text-sm">{{ device.name }}</div>

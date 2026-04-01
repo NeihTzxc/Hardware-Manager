@@ -3,6 +3,7 @@ import Tabs from '~/components/ui/Tabs.vue'
 import AppButton from '~/components/ui/AppButton.vue'
 import DeviceModal from '~/components/modals/DeviceModal.vue'
 import BorrowModal from '~/components/modals/BorrowModal.vue'
+import ArrowLeftIcon from '~/components/ui/icons/ArrowLeftIcon.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -130,9 +131,7 @@ onMounted(() => {
     <div class="detail-header">
       <div class="flex items-center gap-4">
         <button class="back-btn" @click="router.back()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-          </svg>
+          <ArrowLeftIcon :size="20" />
         </button>
         <div>
           <div class="breadcrumb">

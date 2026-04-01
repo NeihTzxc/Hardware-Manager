@@ -2,6 +2,10 @@
 import AppButton from '~/components/ui/AppButton.vue'
 import DomainModal from '~/components/modals/DomainModal.vue'
 import SslCertificateModal from '~/components/modals/SslCertificateModal.vue'
+import PlusIcon from '~/components/ui/icons/PlusIcon.vue'
+import DomainIcon from '~/components/ui/icons/DomainIcon.vue'
+import SearchIcon from '~/components/ui/icons/SearchIcon.vue'
+import ShieldIcon from '~/components/ui/icons/ShieldIcon.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -125,9 +129,7 @@ onMounted(() => {
       </div>
       <AppButton :label="activeTab === 'domains' ? 'Thêm Tên miền' : 'Thêm SSL'" variant="primary" @click="openAddModal">
         <template #icon>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <PlusIcon :size="18" :stroke-width="2.5" />
         </template>
       </AppButton>
     </div>
@@ -138,18 +140,14 @@ onMounted(() => {
         :class="['tab-link', { 'active': activeTab === 'domains' }]" 
         @click="activeTab = 'domains'; searchQuery = ''; statusFilter = ''"
       >
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-        </svg>
+        <DomainIcon :size="18" class="tab-icon" />
         Tên miền (Domains)
       </button>
       <button 
         :class="['tab-link', { 'active': activeTab === 'ssl' }]" 
         @click="activeTab = 'ssl'; searchQuery = ''; statusFilter = ''"
       >
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
+        <ShieldIcon :size="18" class="tab-icon" />
         Chứng chỉ SSL (Certificates)
       </button>
     </div>
@@ -157,9 +155,7 @@ onMounted(() => {
     <!-- Filters -->
     <div class="filters-card shadow-sm">
       <div class="search-box">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
+        <SearchIcon :size="18" class="search-icon" />
         <input 
           v-model="searchQuery" 
           type="text" 
@@ -197,9 +193,7 @@ onMounted(() => {
     <div v-else-if="activeTab === 'domains'">
       <div v-if="domains.length === 0" class="empty-state">
         <div class="empty-state-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-          </svg>
+          <DomainIcon :stroke-width="1.5" />
         </div>
         <h3 class="empty-state-title">Không tìm thấy tên miền nào</h3>
         <AppButton label="Thêm Tên miền mới" variant="secondary" class="mt-4" @click="openAddModal" />
@@ -259,9 +253,7 @@ onMounted(() => {
     <div v-else-if="activeTab === 'ssl'">
       <div v-if="certificates.length === 0" class="empty-state">
         <div class="empty-state-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
+          <ShieldIcon :stroke-width="1.5" />
         </div>
         <h3 class="empty-state-title">Không tìm thấy chứng chỉ SSL nào</h3>
         <AppButton label="Thêm SSL mới" variant="secondary" class="mt-4" @click="openAddModal" />

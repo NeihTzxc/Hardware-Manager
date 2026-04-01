@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
+import CloseIcon from '~/components/ui/icons/CloseIcon.vue'
 
 const props = defineProps<{
   user: any | null
@@ -72,7 +73,7 @@ async function submitForm() {
       <div class="modal-header">
         <h3 class="modal-title">{{ isEdit ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới' }}</h3>
         <button class="close-btn" @click="emit('close')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+          <CloseIcon :size="20" />
         </button>
       </div>
       

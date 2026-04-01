@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppButton from '~/components/ui/AppButton.vue'
 import CategoryModal from '~/components/modals/CategoryModal.vue'
+import CategoryIcon from '~/components/ui/icons/CategoryIcon.vue'
 
 definePageMeta({ 
   layout: 'dashboard',
@@ -118,9 +119,7 @@ onMounted(() => {
 
     <div v-else class="empty-state">
       <div class="empty-state-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
-        </svg>
+        <CategoryIcon :stroke-width="1.5" />
       </div>
       <h3 class="empty-state-title">Chưa có danh mục nào</h3>
       <p class="empty-state-desc">Hãy bắt đầu bằng cách thêm danh mục mới vào hệ thống.</p>

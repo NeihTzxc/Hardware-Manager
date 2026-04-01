@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import AppButton from '~/components/ui/AppButton.vue'
+import ArrowLeftIcon from '~/components/ui/icons/ArrowLeftIcon.vue'
+import DeviceIcon from '~/components/ui/icons/DeviceIcon.vue'
+import UserCheckIcon from '~/components/ui/icons/UserCheckIcon.vue'
+import ShieldIcon from '~/components/ui/icons/ShieldIcon.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -41,9 +45,7 @@ onMounted(() => {
     <div class="detail-header">
       <div class="flex items-center gap-4">
         <button class="back-btn" @click="router.back()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-          </svg>
+          <ArrowLeftIcon :size="20" />
         </button>
         <div>
           <div class="breadcrumb">
@@ -72,7 +74,7 @@ onMounted(() => {
         <h2 class="card-title">Thiết bị</h2>
         <div class="flex items-center gap-4 mb-6">
           <div class="device-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <DeviceIcon :size="28" />
           </div>
           <div>
             <NuxtLink :to="`/devices/${assignment.device.id}`" class="text-lg font-bold hover:text-accent transition-colors">
@@ -123,7 +125,7 @@ onMounted(() => {
         <div class="assignment-flow">
           <div class="flow-step">
             <div class="step-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+              <UserCheckIcon :size="20" />
             </div>
             <div class="step-content">
               <label>Ngày cấp</label>
@@ -137,7 +139,7 @@ onMounted(() => {
 
           <div class="flow-step" :class="{ 'pending': !assignment.returnedAt }">
             <div class="step-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <ShieldIcon :size="20" />
             </div>
             <div class="step-content">
               <label>Ngày trả</label>

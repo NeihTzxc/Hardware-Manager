@@ -2,6 +2,7 @@
 import AppButton from '~/components/ui/AppButton.vue'
 import AppDialog from '~/components/ui/AppDialog.vue'
 import AppFormControl from '~/components/ui/AppFormControl.vue'
+import AssignmentIcon from '~/components/ui/icons/AssignmentIcon.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -296,12 +297,7 @@ onMounted(() => {
 
     <div v-else class="empty-state">
       <div class="empty-state-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-          stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-        </svg>
+        <AssignmentIcon :stroke-width="1.5" />
       </div>
       <h3 class="empty-state-title">Chưa có lịch sử mượn trả</h3>
       <p class="empty-state-desc">Hãy bắt đầu bằng cách cấp phát thiết bị cho nhân viên.</p>

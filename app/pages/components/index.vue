@@ -2,6 +2,7 @@
 import AppButton from '~/components/ui/AppButton.vue'
 import ComponentModal from '~/components/modals/ComponentModal.vue'
 import InstallComponentModal from '~/components/modals/InstallComponentModal.vue'
+import ComponentIcon from '~/components/ui/icons/ComponentIcon.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -169,10 +170,7 @@ const getStatusLabel = (status: string) => {
 
     <div v-else class="empty-state">
       <div class="empty-state-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="4" y="4" width="16" height="16" rx="2" />
-          <path d="M9 9h6M9 13h6M9 17h4" />
-        </svg>
+        <ComponentIcon :stroke-width="1.5" />
       </div>
       <h3 class="empty-state-title">Chưa có linh kiện nào</h3>
       <p class="empty-state-desc">Hãy bắt đầu bằng cách thêm linh kiện mới vào kho.</p>

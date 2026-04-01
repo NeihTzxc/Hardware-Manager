@@ -1,6 +1,18 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { useLayoutStore } from '~/stores/layout'
+import DashboardIcon from './ui/icons/DashboardIcon.vue'
+import DeviceIcon from './ui/icons/DeviceIcon.vue'
+import ComponentIcon from './ui/icons/ComponentIcon.vue'
+import AccessoryIcon from './ui/icons/AccessoryIcon.vue'
+import CategoryIcon from './ui/icons/CategoryIcon.vue'
+import AssignmentIcon from './ui/icons/AssignmentIcon.vue'
+import PrintTemplateIcon from './ui/icons/PrintTemplateIcon.vue'
+import SoftwareIcon from './ui/icons/SoftwareIcon.vue'
+import DomainIcon from './ui/icons/DomainIcon.vue'
+import SettingsIcon from './ui/icons/SettingsIcon.vue'
+import AuditLogIcon from './ui/icons/AuditLogIcon.vue'
+import LogoutIcon from './ui/icons/LogoutIcon.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -150,82 +162,27 @@ function isActive(path: string) {
           <NuxtLink :to="item.to" class="nav-link" :class="{ active: isActive(item.to) }" @click="closeMobile">
             <div class="nav-icon">
               <!-- Dashboard -->
-              <svg v-if="item.icon === 'dashboard'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                <rect x="14" y="14" width="7" height="7" rx="1.5" />
-              </svg>
+              <DashboardIcon v-if="item.icon === 'dashboard'" />
               <!-- Devices -->
-              <svg v-else-if="item.icon === 'devices'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="3" width="20" height="14" rx="2" />
-                <path d="M8 21h8M12 17v4" />
-              </svg>
+              <DeviceIcon v-else-if="item.icon === 'devices'" />
               <!-- Categories -->
-              <svg v-else-if="item.icon === 'categories'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
-              </svg>
+              <CategoryIcon v-else-if="item.icon === 'categories'" />
               <!-- Components (chip/circuit) -->
-              <svg v-else-if="item.icon === 'components'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="4" y="4" width="16" height="16" rx="2" />
-                <rect x="9" y="9" width="6" height="6" rx="1" />
-                <path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3" />
-              </svg>
+              <ComponentIcon v-else-if="item.icon === 'components'" />
               <!-- Accessories (package/box) -->
-              <svg v-else-if="item.icon === 'accessories'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path
-                  d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                <line x1="12" y1="22.08" x2="12" y2="12" />
-              </svg>
+              <AccessoryIcon v-else-if="item.icon === 'accessories'" />
               <!-- Assignments -->
-              <svg v-else-if="item.icon === 'assignments'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-              </svg>
+              <AssignmentIcon v-else-if="item.icon === 'assignments'" />
               <!-- Print Templates -->
-              <svg v-else-if="item.icon === 'print-templates'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 6 2 18 2 18 9" />
-                <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-                <rect x="6" y="14" width="12" height="8" />
-              </svg>
+              <PrintTemplateIcon v-else-if="item.icon === 'print-templates'" />
               <!-- Software (monitor/window) -->
-              <svg v-else-if="item.icon === 'software'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                <line x1="8" y1="21" x2="16" y2="21" />
-                <line x1="12" y1="17" x2="12" y2="21" />
-                <path d="M6 8l3 3-3 3" />
-                <line x1="14" y1="14" x2="18" y2="14" />
-              </svg>
+              <SoftwareIcon v-else-if="item.icon === 'software'" />
               <!-- Web Infrastructure (globe) -->
-              <svg v-else-if="item.icon === 'domains'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="2" y1="12" x2="22" y2="12" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
+              <DomainIcon v-else-if="item.icon === 'domains'" />
               <!-- Settings -->
-              <svg v-else-if="item.icon === 'settings'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3" />
-                <path
-                  d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-              </svg>
+              <SettingsIcon v-else-if="item.icon === 'settings'" />
               <!-- Audit Logs (history/clock) -->
-              <svg v-else-if="item.icon === 'audit-logs'" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
+              <AuditLogIcon v-else-if="item.icon === 'audit-logs'" />
             </div>
             <Transition name="fade-text">
               <span v-if="!layoutStore.isSidebarCollapsed" class="nav-label">{{ item.label }}</span>
@@ -243,10 +200,7 @@ function isActive(path: string) {
       <div class="sidebar-divider" />
       <button class="nav-link logout-btn" @click="emit('logout')">
         <div class="nav-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-            stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
-          </svg>
+          <LogoutIcon />
         </div>
         <Transition name="fade-text">
           <span v-if="!layoutStore.isSidebarCollapsed" class="nav-label">Đăng xuất</span>

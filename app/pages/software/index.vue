@@ -2,6 +2,10 @@
 import AppButton from '~/components/ui/AppButton.vue'
 import SoftwareModal from '~/components/modals/SoftwareModal.vue'
 import LicenseModal from '~/components/modals/LicenseModal.vue'
+import PlusIcon from '~/components/ui/icons/PlusIcon.vue'
+import SearchIcon from '~/components/ui/icons/SearchIcon.vue'
+import SoftwareIcon from '~/components/ui/icons/SoftwareIcon.vue'
+import ShieldIcon from '~/components/ui/icons/ShieldIcon.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -139,9 +143,7 @@ onMounted(() => {
       </div>
       <AppButton :label="activeTab === 'software' ? 'Thêm Phần mềm' : 'Thêm License'" variant="primary" @click="openAddModal">
         <template #icon>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
+          <PlusIcon :size="18" :stroke-width="2.5" />
         </template>
       </AppButton>
     </div>
@@ -152,18 +154,14 @@ onMounted(() => {
         :class="['tab-link', { 'active': activeTab === 'software' }]" 
         @click="activeTab = 'software'; searchQuery = ''; categoryFilter = ''; statusFilter = ''"
       >
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="15" x2="23" y2="15"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="15" x2="4" y2="15"/>
-        </svg>
+        <SoftwareIcon :size="18" class="tab-icon" />
         Danh sách phần mềm
       </button>
       <button 
         :class="['tab-link', { 'active': activeTab === 'licenses' }]" 
         @click="activeTab = 'licenses'; searchQuery = ''; categoryFilter = ''; statusFilter = ''"
       >
-        <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
-        </svg>
+        <ShieldIcon :size="18" class="tab-icon" />
         Quản lý Giấy phép (Licenses)
       </button>
     </div>
@@ -171,9 +169,7 @@ onMounted(() => {
     <!-- Filters -->
     <div class="filters-card shadow-sm">
       <div class="search-box">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
+        <SearchIcon :size="18" class="search-icon" />
         <input 
           v-model="searchQuery" 
           type="text" 
@@ -211,9 +207,7 @@ onMounted(() => {
     <div v-else-if="activeTab === 'software'">
       <div v-if="softwareList.length === 0" class="empty-state">
         <div class="empty-state-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
-          </svg>
+          <SoftwareIcon :stroke-width="1.5" />
         </div>
         <h3 class="empty-state-title">Chưa có phần mềm nào</h3>
         <AppButton label="Thêm phần mềm mới" variant="secondary" class="mt-4" @click="openAddModal" />
@@ -262,9 +256,7 @@ onMounted(() => {
     <div v-else-if="activeTab === 'licenses'">
       <div v-if="licenses.length === 0" class="empty-state">
         <div class="empty-state-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
-          </svg>
+          <ShieldIcon :stroke-width="1.5" />
         </div>
         <h3 class="empty-state-title">Chưa có license nào</h3>
         <AppButton label="Thêm License mới" variant="secondary" class="mt-4" @click="openAddModal" />

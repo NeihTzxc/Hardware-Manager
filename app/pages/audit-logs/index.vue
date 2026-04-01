@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import AppButton from '~/components/ui/AppButton.vue'
+import AuditLogIcon from '~/components/ui/icons/AuditLogIcon.vue'
+import EyeIcon from '~/components/ui/icons/EyeIcon.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -163,10 +165,7 @@ function closeDetail() {
             <td><code class="entity-id">{{ log.entityId || '—' }}</code></td>
             <td class="text-right">
               <button class="view-btn" @click.stop="viewDetail(log)">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
-                </svg>
+                <EyeIcon :size="16" />
               </button>
             </td>
           </tr>
@@ -199,10 +198,7 @@ function closeDetail() {
 
     <div v-else class="empty-state">
       <div class="empty-state-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <polyline points="12 6 12 12 16 14" />
-        </svg>
+        <AuditLogIcon :stroke-width="1.5" />
       </div>
       <h3 class="empty-state-title">Chưa có hoạt động nào</h3>
       <p class="empty-state-desc">Các thao tác trên hệ thống sẽ được ghi lại tại đây.</p>

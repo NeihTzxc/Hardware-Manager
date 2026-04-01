@@ -2,6 +2,8 @@
 import AppButton from '~/components/ui/AppButton.vue'
 import DeviceModal from '~/components/modals/DeviceModal.vue'
 import BorrowModal from '~/components/modals/BorrowModal.vue'
+import SearchIcon from '~/components/ui/icons/SearchIcon.vue'
+import DeviceIcon from '~/components/ui/icons/DeviceIcon.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -162,10 +164,7 @@ const isFiltered = computed(() => {
         </div>
 
         <div class="search-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+          <SearchIcon :size="16" class="search-icon" />
           <input v-model="searchQuery" type="text" placeholder="Tìm kiếm..." class="search-input" />
         </div>
         <AppButton label="Thêm thiết bị" variant="primary" @click="isAddModalOpen = true" />
@@ -258,17 +257,8 @@ const isFiltered = computed(() => {
 
     <div v-else class="empty-state">
       <div class="empty-state-icon">
-        <svg v-if="isFiltered" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          <line x1="8" y1="8" x2="14" y2="14" />
-          <line x1="14" y1="8" x2="8" y2="14" />
-        </svg>
-        <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-          stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2" />
-          <path d="M8 21h8M12 17v4" />
-        </svg>
+        <SearchIcon v-if="isFiltered" :stroke-width="1.5" />
+        <DeviceIcon v-else :stroke-width="1.5" />
       </div>
       <h3 class="empty-state-title">{{ isFiltered ? 'Không tìm thấy kết quả phù hợp' : 'Chưa có thiết bị nào' }}</h3>
       <p class="empty-state-desc">{{ isFiltered ? 'Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.' : 'Hãy bắt đầu bằng cách thêm thiết bị mới vào hệ thống.' }}</p>

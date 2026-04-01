@@ -6,6 +6,9 @@ definePageMeta({
 
 import AppButton from '~/components/ui/AppButton.vue'
 import PrintTemplateModal from '~/components/modals/PrintTemplateModal.vue'
+import EditIcon from '~/components/ui/icons/EditIcon.vue'
+import TrashIcon from '~/components/ui/icons/TrashIcon.vue'
+import PrintTemplateIcon from '~/components/ui/icons/PrintTemplateIcon.vue'
 
 const api = useApi()
 const { success, error: notifyError } = useNotification()
@@ -101,18 +104,10 @@ onMounted(() => {
           <span class="date-text">Cập nhật: {{ new Date(template.updatedAt).toLocaleDateString('vi-VN') }}</span>
           <div class="actions">
             <button class="icon-btn edit-btn" @click="openEditModal(template)" title="Chỉnh sửa">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-              </svg>
+              <EditIcon :size="16" />
             </button>
             <button class="icon-btn delete-btn" @click="handleDelete(template)" title="Xoá">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                <line x1="10" y1="11" x2="10" y2="17" />
-                <line x1="14" y1="11" x2="14" y2="17" />
-              </svg>
+              <TrashIcon :size="16" />
             </button>
           </div>
         </div>
@@ -121,11 +116,7 @@ onMounted(() => {
 
     <div v-else class="empty-state">
       <div class="empty-state-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 6 2 18 2 18 9" />
-          <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-          <rect x="6" y="14" width="12" height="8" />
-        </svg>
+        <PrintTemplateIcon :stroke-width="1.5" />
       </div>
       <h3 class="empty-state-title">Chưa có biểu mẫu in ấn nào</h3>
       <p class="empty-state-desc">Hãy tạo một biểu mẫu HTML tùy chỉnh để áp dụng lúc tạo biên bản cho nhân viên.</p>

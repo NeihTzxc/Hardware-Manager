@@ -103,7 +103,7 @@ const getStatusLabel = (status: string) => {
 </script>
 
 <template>
-  <div class="page-container fade-in">
+  <div class="page-container wide fade-in">
     <div class="page-header">
       <div>
         <h1 class="page-title">Quản lý linh kiện</h1>
@@ -190,7 +190,6 @@ const getStatusLabel = (status: string) => {
 </template>
 
 <style scoped>
-.page-container { max-width: 1200px; }
 
 .page-header {
   display: flex;

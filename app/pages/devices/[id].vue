@@ -363,9 +363,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.page-container {
-  max-width: 1200px;
-}
 
 .detail-header {
   display: flex;

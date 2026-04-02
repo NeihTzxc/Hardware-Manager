@@ -72,7 +72,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="page-container fade-in">
+  <div class="page-container wide fade-in">
     <div class="page-header">
       <div>
         <h1 class="page-title">Biểu mẫu In ấn</h1>
@@ -133,9 +133,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.page-container {
-  max-width: 1200px;
-}
 
 .page-header {
   display: flex;
@@ -319,6 +316,7 @@ onMounted(() => {
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.5;

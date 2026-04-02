@@ -104,7 +104,7 @@ function closeDetail() {
 </script>
 
 <template>
-  <div class="page-container fade-in">
+  <div class="page-container wide fade-in">
     <div class="page-header">
       <div>
         <h1 class="page-title">Lịch sử hoạt động</h1>
@@ -258,9 +258,6 @@ function closeDetail() {
 </template>
 
 <style scoped>
-.page-container {
-  max-width: 1200px;
-}
 
 .page-header {
   display: flex;

@@ -2,6 +2,7 @@
 import AppButton from '~/components/ui/AppButton.vue'
 import DeviceModal from '~/components/modals/DeviceModal.vue'
 import BorrowModal from '~/components/modals/BorrowModal.vue'
+import ImportModal from '~/components/modals/ImportModal.vue'
 import SearchIcon from '~/components/ui/icons/SearchIcon.vue'
 import DeviceIcon from '~/components/ui/icons/DeviceIcon.vue'
 
@@ -15,6 +16,7 @@ const api = useApi()
 const isAddModalOpen = ref(false)
 const isEditModalOpen = ref(false)
 const isBorrowModalOpen = ref(false)
+const isImportModalOpen = ref(false)
 const selectedDevice = ref<any>(null)
 const searchQuery = ref('')
 const selectedCategory = ref('')
@@ -112,8 +114,21 @@ function closeModals() {
   isAddModalOpen.value = false
   isEditModalOpen.value = false
   isBorrowModalOpen.value = false
+  isImportModalOpen.value = false
   selectedDevice.value = null
 }
+
+const importDeviceMapping = {
+  'Tên thiết bị': 'name',
+  'Số serial': 'serialNumber',
+  'Danh mục': 'categoryName',
+  'Model': 'model',
+  'Hãng sản xuất': 'manufacturer',
+  'Trạng thái': 'status',
+  'Tình trạng': 'condition',
+  'Ghi chú': 'notes'
+}
+const requiredDeviceColumns = ['Tên thiết bị', 'Số serial', 'Danh mục']
 
 function goToDetail(id: string) {
   router.push(`/devices/${id}`)
@@ -167,6 +182,7 @@ const isFiltered = computed(() => {
           <SearchIcon :size="16" class="search-icon" />
           <input v-model="searchQuery" type="text" placeholder="Tìm kiếm..." class="search-input" />
         </div>
+        <AppButton label="Nhập Excel" variant="secondary" @click="isImportModalOpen = true" />
         <AppButton label="Thêm thiết bị" variant="primary" @click="isAddModalOpen = true" />
       </div>
     </div>
@@ -273,9 +289,19 @@ const isFiltered = computed(() => {
     <!-- Modals -->
     <DeviceModal v-model="isAddModalOpen" @save="onDeviceSave" />
     <DeviceModal v-model="isEditModalOpen" :device="selectedDevice" @save="onDeviceSave"
-      @update:model-value="val => !val && closeModals()" />
+      @close="closeModals" />
     <BorrowModal v-model="isBorrowModalOpen" :device="selectedDevice" @save="onDeviceSave"
-      @update:model-value="val => !val && closeModals()" />
+      @close="closeModals" />
+    <ImportModal 
+      v-model="isImportModalOpen" 
+      title="Nhập dữ liệu Thiết bị (Excel/CSV)" 
+      template-url="/templates/devices_import_template.xlsx"
+      import-api-url="/api/devices/import" 
+      data-key="devices" 
+      :column-mapping="importDeviceMapping" 
+      :required-columns="requiredDeviceColumns"
+      @success="fetchDevices" 
+    />
   </div>
 </template>
 

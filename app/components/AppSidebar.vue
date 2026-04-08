@@ -12,6 +12,7 @@ import SoftwareIcon from './ui/icons/SoftwareIcon.vue'
 import DomainIcon from './ui/icons/DomainIcon.vue'
 import SettingsIcon from './ui/icons/SettingsIcon.vue'
 import AuditLogIcon from './ui/icons/AuditLogIcon.vue'
+import TicketIcon from './ui/icons/TicketIcon.vue'
 import LogoutIcon from './ui/icons/LogoutIcon.vue'
 
 const route = useRoute()
@@ -25,6 +26,11 @@ const navItems = [
     label: 'Dashboard',
     icon: 'dashboard',
     to: '/dashboard',
+  },
+  {
+    label: 'Hỗ trợ / Yêu cầu',
+    icon: 'tickets',
+    to: '/tickets',
   },
   {
     label: 'Quản lý thiết bị',
@@ -163,6 +169,8 @@ function isActive(path: string) {
             <div class="nav-icon">
               <!-- Dashboard -->
               <DashboardIcon v-if="item.icon === 'dashboard'" />
+              <!-- Tickets -->
+              <TicketIcon v-else-if="item.icon === 'tickets'" />
               <!-- Devices -->
               <DeviceIcon v-else-if="item.icon === 'devices'" />
               <!-- Categories -->

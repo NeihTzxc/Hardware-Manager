@@ -19,6 +19,28 @@ enum Role {
   USER
 }
 
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketType {
+  HARDWARE_REQUEST
+  HARDWARE_ISSUE
+  SOFTWARE_REQUEST
+  SOFTWARE_ISSUE
+  OTHER
+}
+
 enum DeviceStatus {
   AVAILABLE
   IN_USE
@@ -99,6 +121,9 @@ model User {
   maintenances       MaintenanceLog[] @relation("PerformedBy")
   accessoryCheckouts AccessoryCheckout[]
   auditLogs          AuditLog[]
+  ticketsRequested   Ticket[] @relation("TicketRequester")
+  ticketsAssigned    Ticket[] @relation("TicketAssignee")
+  ticketComments     TicketComment[]
 }
 
 model RefreshToken {
@@ -173,6 +198,7 @@ model Device {
   maintenances   MaintenanceLog[]
   components     Component[]
   componentInstallations ComponentInstallation[]
+  tickets        Ticket[]
 
   @@index([categoryId])
   @@index([supplierId])
@@ -414,4 +440,49 @@ model SystemSetting {
   value     Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// ==================== TICKETING SYSTEM ====================
+
+model Ticket {
+  id          String         @id // auto generated TKT- prefix from application
+  title       String
+  description String         @db.Text
+  status      TicketStatus   @default(OPEN)
+  priority    TicketPriority @default(MEDIUM)
+  type        TicketType     @default(HARDWARE_REQUEST)
+  
+  requesterId String
+  requester   User           @relation("TicketRequester", fields: [requesterId], references: [id])
+  
+  assigneeId  String?
+  assignee    User?          @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  
+  deviceId    String?
+  device      Device?        @relation(fields: [deviceId], references: [id])
+  
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  
+  comments    TicketComment[]
+
+  @@index([requesterId])
+  @@index([assigneeId])
+  @@index([deviceId])
+  @@index([status])
+}
+
+model TicketComment {
+  id        String   @id @default(uuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  content   String   @db.Text
+  isInternal Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ticketId])
+  @@index([authorId])
 }

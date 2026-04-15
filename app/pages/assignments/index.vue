@@ -178,7 +178,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="page-container wide fade-in">
+  <div class="page-container wide full-height fade-in">
     <div class="page-header">
       <div>
         <h1 class="page-title">Quản lý mượn trả</h1>
@@ -430,7 +430,6 @@ onMounted(() => {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  overflow: hidden;
   box-shadow: var(--shadow-sm);
 }
 

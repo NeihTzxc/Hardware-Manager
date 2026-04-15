@@ -114,6 +114,35 @@ img {
   display: block;
 }
 
+/* ---------- Custom Scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
 /* ---------- Keyframe Animations ---------- */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(12px); }
@@ -168,9 +197,25 @@ img {
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .page-container.wide {
   max-width: 1600px;
+}
+
+/* Internal scroll support */
+.page-container.full-height {
+  height: 100%;
+  overflow: hidden;
+}
+
+.page-container.full-height .table-container {
+  flex: 1;
+  overflow: auto;
 }
 

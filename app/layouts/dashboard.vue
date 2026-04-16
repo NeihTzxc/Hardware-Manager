@@ -38,7 +38,10 @@ async function handleLogout() {
   margin-left: 260px;
   padding: var(--spacing-xl) var(--spacing-2xl);
   transition: margin-left var(--transition-base);
-  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .dashboard-main.collapsed {

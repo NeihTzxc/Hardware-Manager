@@ -104,7 +104,7 @@ function closeDetail() {
 </script>
 
 <template>
-  <div class="page-container wide fade-in">
+  <div class="page-container wide full-height fade-in">
     <div class="page-header">
       <div>
         <h1 class="page-title">Lịch sử hoạt động</h1>
@@ -312,7 +312,6 @@ function closeDetail() {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  overflow: hidden;
   box-shadow: var(--shadow-sm);
 }
 

@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import type { Component } from 'vue'
+
 interface Tab {
   id: string
   label: string
-  icon?: string
+  icon?: string | Component
 }
 
 const props = defineProps<{
@@ -25,7 +27,10 @@ const emit = defineEmits<{
         :class="{ active: modelValue === tab.id }"
         @click="emit('update:modelValue', tab.id)"
       >
-        <span v-if="tab.icon" class="tab-icon" v-html="tab.icon"></span>
+        <span v-if="tab.icon" class="tab-icon">
+          <component :is="tab.icon" v-if="typeof tab.icon !== 'string'" />
+          <span v-else v-html="tab.icon" style="display: contents;"></span>
+        </span>
         <span class="tab-label">{{ tab.label }}</span>
       </button>
     </div>

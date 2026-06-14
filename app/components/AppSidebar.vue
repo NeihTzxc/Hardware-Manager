@@ -334,10 +334,24 @@ function isActive(path: string) {
   border: 1px solid rgba(168, 85, 247, 0.3);
 }
 
+:global(html.light) .role-admin,
+:global(html.light-mode) .role-admin {
+  background: rgba(168, 85, 247, 0.1);
+  color: #7c3aed;
+  border-color: rgba(168, 85, 247, 0.2);
+}
+
 .role-user {
   background: rgba(59, 130, 246, 0.15);
   color: #60a5fa;
   border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+:global(html.light) .role-user,
+:global(html.light-mode) .role-user {
+  background: rgba(37, 99, 235, 0.1);
+  color: #2563eb;
+  border-color: rgba(37, 99, 235, 0.2);
 }
 
 .user-email {

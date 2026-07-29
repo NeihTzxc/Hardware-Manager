@@ -10,25 +10,28 @@ RUN yarn install --frozen-lockfile
 # Copy local code to the container image
 COPY . .
 
-# Build the Nuxt application
+# Generate Prisma Client rõ ràng
+RUN npx prisma generate
+
+# Build Nuxt
 RUN yarn build
 
-# Production image
-FROM node:24-alpine
 
-# Set working directory
+FROM node:24-alpine AS runtime
+
 WORKDIR /app
 
-# Copy the build output from the builder stage
-COPY --from=builder /app/.output /app/.output
-
-# Expose Nuxt port
-EXPOSE 3000
-
-# Set environment variables
 ENV HOST=0.0.0.0
 ENV PORT=3000
 ENV NODE_ENV=production
 
-# Start the application
+# Copy Nuxt output trước
+COPY --from=builder /app/.output /app/.output
+
+# Sau đó bổ sung generated Prisma Client
+COPY --from=builder /app/node_modules/.prisma \
+  /app/.output/server/node_modules/.prisma
+
+EXPOSE 3000
+
 CMD ["node", ".output/server/index.mjs"]

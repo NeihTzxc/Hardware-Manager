@@ -80,7 +80,7 @@ onMounted(() => {
             <NuxtLink :to="`/devices/${assignment.device.id}`" class="text-lg font-bold hover:text-accent transition-colors">
               {{ assignment.device.name }}
             </NuxtLink>
-            <p class="text-sm text-muted">{{ assignment.device.serialNumber }} • {{ assignment.device.category?.name }}</p>
+            <p class="text-sm text-muted">{{ assignment.device.serialNumber || 'Không có serial' }} • {{ assignment.device.category?.name }}</p>
           </div>
         </div>
         <div class="details-grid-2">

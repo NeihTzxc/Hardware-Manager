@@ -175,7 +175,7 @@ const getPriorityLabel = (p: string) => {
                </div>
                <div>
                  <p class="text-sm text-gray-500 font-medium">Thiết bị liên quan</p>
-                 <p class="font-bold text-gray-800">{{ ticket.device.name }} ({{ ticket.device.serialNumber }})</p>
+                 <p class="font-bold text-gray-800">{{ ticket.device.name }} ({{ ticket.device.serialNumber || 'Không có serial' }})</p>
                </div>
             </div>
           </div>

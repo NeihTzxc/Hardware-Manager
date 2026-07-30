@@ -128,7 +128,7 @@ const importDeviceMapping = {
   'Tình trạng': 'condition',
   'Ghi chú': 'notes'
 }
-const requiredDeviceColumns = ['Tên thiết bị', 'Số serial', 'Danh mục']
+const requiredDeviceColumns = ['Tên thiết bị', 'Danh mục']
 
 function goToDetail(id: string) {
   router.push(`/devices/${id}`)
@@ -244,7 +244,7 @@ const isFiltered = computed(() => {
                 <span class="device-id">{{ device.id }}</span>
               </div>
             </td>
-            <td>{{ device.serialNumber }}</td>
+            <td>{{ device.serialNumber || '—' }}</td>
             <td>
               <span class="category-tag">{{ device.category?.name }}</span>
             </td>

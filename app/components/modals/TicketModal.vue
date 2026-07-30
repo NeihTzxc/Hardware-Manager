@@ -27,7 +27,7 @@ const form = reactive({
   deviceId: ''
 })
 
-const devices = ref<{ id: string; name: string, serialNumber: string }[]>([])
+const devices = ref<{ id: string; name: string, serialNumber: string | null }[]>([])
 
 async function fetchDevices() {
   try {
@@ -119,7 +119,7 @@ function resetForm() {
         <select v-model="form.deviceId" id="device">
           <option value="" selected>-- Không chọn --</option>
           <option v-for="dev in devices" :key="dev.id" :value="dev.id">
-            {{ dev.name }} ({{ dev.serialNumber }})
+            {{ dev.name }} ({{ dev.serialNumber || 'Không có serial' }})
           </option>
         </select>
       </AppFormControl>

@@ -177,7 +177,7 @@ model Location {
 model Device {
   id             String          @id // auto generated DEV- prefix from application
   name           String
-  serialNumber   String          @unique
+  serialNumber   String?         @unique
   model          String?
   manufacturer   String?
   status         DeviceStatus    @default(AVAILABLE)

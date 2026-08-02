@@ -3,9 +3,11 @@ import Tabs from '~/components/ui/Tabs.vue'
 import UserList from '~/components/users/UserList.vue'
 import AlertConfiguration from '~/components/settings/AlertConfiguration.vue'
 import SystemConfiguration from '~/components/settings/SystemConfiguration.vue'
+import DataReset from '~/components/settings/DataReset.vue'
 import UsersIcon from '~/components/ui/icons/UsersIcon.vue'
 import BellIcon from '~/components/ui/icons/BellIcon.vue'
 import SettingsIcon from '~/components/ui/icons/SettingsIcon.vue'
+import DatabaseIcon from '~/components/ui/icons/DatabaseIcon.vue'
 
 definePageMeta({
   layout: 'dashboard',
@@ -29,6 +31,11 @@ const tabs = [
     id: 'system',
     label: 'Hệ thống',
     icon: SettingsIcon
+  },
+  {
+    id: 'data',
+    label: 'Dữ liệu',
+    icon: DatabaseIcon
   }
 ]
 </script>
@@ -57,6 +64,11 @@ const tabs = [
         <!-- System Tab -->
         <div v-if="activeTab === 'system'">
           <SystemConfiguration />
+        </div>
+
+        <!-- Data Tab -->
+        <div v-if="activeTab === 'data'">
+          <DataReset />
         </div>
       </Tabs>
     </div>

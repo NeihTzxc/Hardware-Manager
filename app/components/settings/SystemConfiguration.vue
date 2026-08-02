@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import SunIcon from '~/components/ui/icons/SunIcon.vue'
 import MoonIcon from '~/components/ui/icons/MoonIcon.vue'
 import MonitorIcon from '~/components/ui/icons/MonitorIcon.vue'
-import DataReset from '~/components/settings/DataReset.vue'
 
 const colorMode = useColorMode()
 
@@ -82,8 +81,6 @@ const selectTheme = (value: string) => {
         </button>
       </div>
     </div>
-
-    <DataReset />
   </div>
 </template>
 

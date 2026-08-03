@@ -186,7 +186,7 @@ onMounted(() => {
             </div>
             <div class="detail-item">
               <label>Số Serial</label>
-              <span>{{ device.serialNumber }}</span>
+              <span>{{ device.serialNumber || '—' }}</span>
             </div>
             <div class="detail-item">
               <label>Danh mục</label>

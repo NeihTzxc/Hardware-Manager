@@ -4,18 +4,18 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
     // Validation
-    if (!body.name || !body.serialNumber || !body.categoryId) {
+    if (!body.name || !body.categoryId) {
         throw createError({
             statusCode: 400,
-            message: 'Tên, số Serial và Danh mục là bắt buộc.'
+            message: 'Tên và Danh mục là bắt buộc.'
         })
     }
 
     try {
-        // Check if serial number already exists
-        const existingDevice = await db.device.findUnique({
-            where: { serialNumber: body.serialNumber }
-        })
+        const serialNumber = String(body.serialNumber || '').trim() || null
+        const existingDevice = serialNumber
+            ? await db.device.findUnique({ where: { serialNumber } })
+            : null
 
         if (existingDevice) {
             throw createError({
@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
             data: {
                 id: generateId('DEV'),
                 name: body.name,
-                serialNumber: body.serialNumber,
+                serialNumber,
                 model: body.model || null,
                 manufacturer: body.manufacturer || null,
                 categoryId: body.categoryId,

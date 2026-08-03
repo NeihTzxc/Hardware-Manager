@@ -57,7 +57,7 @@ export default defineEventHandler(async (event) => {
     renderedHtml = renderedHtml.replace(/\{\{userName\}\}/g, assignment.user.name || assignment.user.email)
     renderedHtml = renderedHtml.replace(/\{\{userEmail\}\}/g, assignment.user.email)
     renderedHtml = renderedHtml.replace(/\{\{deviceName\}\}/g, assignment.device.name)
-    renderedHtml = renderedHtml.replace(/\{\{serialNumber\}\}/g, assignment.device.serialNumber)
+    renderedHtml = renderedHtml.replace(/\{\{serialNumber\}\}/g, assignment.device.serialNumber || '—')
     
     const date = type === 'RETURN' && assignment.returnedAt ? assignment.returnedAt : assignment.assignedAt
     renderedHtml = renderedHtml.replace(/\{\{date\}\}/g, new Date(date).toLocaleDateString('vi-VN'))

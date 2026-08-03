@@ -95,7 +95,7 @@ function resetForm() {
         </div>
         <div>
           <div class="font-bold text-sm">{{ device.name }}</div>
-          <div class="text-xs text-muted">{{ device.serialNumber }} • {{ device.model }}</div>
+          <div class="text-xs text-muted">{{ device.serialNumber || 'Không có serial' }} • {{ device.model }}</div>
         </div>
       </div>
 

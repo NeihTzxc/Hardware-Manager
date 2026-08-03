@@ -81,7 +81,7 @@ export default defineEventHandler(async (event) => {
             <tr>
                 <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${index + 1}</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">${a.device.name}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">${a.device.serialNumber}</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">${a.device.serialNumber || '—'}</td>
                 <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${getConditionLabel(condition)}</td>
             </tr>
         `
@@ -112,7 +112,7 @@ export default defineEventHandler(async (event) => {
     
     // For bulk, deviceName and serialNumber display summary
     renderedHtml = renderedHtml.replace(/\{\{deviceName\}\}/g, assignments.length > 1 ? `Danh sách ${assignments.length} thiết bị (xem bảng)` : (assignments[0] as any).device.name)
-    renderedHtml = renderedHtml.replace(/\{\{serialNumber\}\}/g, assignments.length > 1 ? `Đính kèm theo danh sách` : (assignments[0] as any).device.serialNumber)
+    renderedHtml = renderedHtml.replace(/\{\{serialNumber\}\}/g, assignments.length > 1 ? `Đính kèm theo danh sách` : ((assignments[0] as any).device.serialNumber || '—'))
     
     const date = (type === 'RETURN' && mainAssignment.returnedAt) ? mainAssignment.returnedAt : mainAssignment.assignedAt
     renderedHtml = renderedHtml.replace(/\{\{date\}\}/g, new Date(date).toLocaleDateString('vi-VN'))

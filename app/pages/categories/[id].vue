@@ -139,7 +139,7 @@ onMounted(() => {
                 <tr v-for="dev in category.devices" :key="dev.id" @click="router.push(`/devices/${dev.id}`)" class="clickable">
                   <td>{{ dev.id }}</td>
                   <td class="font-bold">{{ dev.name }}</td>
-                  <td>{{ dev.serialNumber }}</td>
+                  <td>{{ dev.serialNumber || '—' }}</td>
                   <td>
                     <span :class="['status-badge status-sm', `status-${dev.status.toLowerCase()}`]">
                       {{ getStatusLabel(dev.status) }}

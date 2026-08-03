@@ -75,16 +75,16 @@ export default defineEventHandler(async (event) => {
         const raw = body.devices[i]
         const displayRowIndex = i + 2 // Because row 1 is usually headers
 
-        if (!raw.name || !raw.serialNumber || !raw.categoryName) {
-            results.errors.push(`Dòng ${displayRowIndex}: Thiếu trường bắt buộc (Tên, Số Serial, Danh mục)`)
+        if (!raw.name || !raw.categoryName) {
+            results.errors.push(`Dòng ${displayRowIndex}: Thiếu trường bắt buộc (Tên, Danh mục)`)
             results.skippedCount++
             continue
         }
 
-        // Check if serial number already exists
-        const existingDevice = await db.device.findUnique({
-            where: { serialNumber: String(raw.serialNumber) }
-        })
+        const serialNumber = raw.serialNumber ? String(raw.serialNumber).trim() : null
+        const existingDevice = serialNumber
+            ? await db.device.findUnique({ where: { serialNumber } })
+            : null
 
         if (existingDevice) {
             results.errors.push(`Dòng ${displayRowIndex}: Số Serial '${raw.serialNumber}' đã tồn tại trong hệ thống.`)
@@ -104,7 +104,7 @@ export default defineEventHandler(async (event) => {
                 data: {
                     id: generateId('DEV'),
                     name: String(raw.name),
-                    serialNumber: String(raw.serialNumber),
+                    serialNumber,
                     model: raw.model ? String(raw.model) : null,
                     manufacturer: raw.manufacturer ? String(raw.manufacturer) : null,
                     categoryId,

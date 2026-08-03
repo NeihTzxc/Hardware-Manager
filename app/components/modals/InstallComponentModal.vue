@@ -84,7 +84,7 @@ function resetForm() {
         <select v-model="form.deviceId" id="install-device">
           <option value="" disabled selected>Chọn thiết bị...</option>
           <option v-for="dev in devices" :key="dev.id" :value="dev.id">
-            {{ dev.name }} ({{ dev.serialNumber }})
+            {{ dev.name }} ({{ dev.serialNumber || 'Không có serial' }})
           </option>
         </select>
       </AppFormControl>

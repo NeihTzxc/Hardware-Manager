@@ -239,7 +239,7 @@ onMounted(() => {
             <td>
               <div class="device-info">
                 <span class="font-bold text-sm">{{ item.device.name }}</span>
-                <span class="text-xs text-muted">{{ item.device.serialNumber }}</span>
+                <span class="text-xs text-muted">{{ item.device.serialNumber || 'Không có serial' }}</span>
               </div>
             </td>
             <td>
@@ -309,7 +309,7 @@ onMounted(() => {
         <div class="p-3 bg-surface rounded-lg border border-border">
           <div class="text-xs text-muted uppercase font-bold mb-1">Thông tin thiết bị</div>
           <div class="font-bold text-sm">{{ selectedAssignment.device.name }}</div>
-          <div class="text-xs text-muted">{{ selectedAssignment.device.serialNumber }}</div>
+          <div class="text-xs text-muted">{{ selectedAssignment.device.serialNumber || 'Không có serial' }}</div>
           <div class="mt-2 text-xs">Người mượn: <b>{{ selectedAssignment.user.name || selectedAssignment.user.email
               }}</b></div>
         </div>

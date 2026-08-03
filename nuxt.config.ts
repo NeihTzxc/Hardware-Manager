@@ -4,6 +4,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@pinia/nuxt', '@nuxt/ui'],
   css: ['~/assets/css/main.css'],
+  colorMode: {
+    preference: 'system',
+    fallback: 'dark',
+    classSuffix: '',
+  },
   app: {
     head: {
       title: 'Hardware Manager',
@@ -18,3 +23,4 @@ export default defineNuxtConfig({
     },
   },
 })
+

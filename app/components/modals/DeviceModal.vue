@@ -50,7 +50,7 @@ watch(() => props.modelValue, (newVal) => {
     fetchCategories()
     if (props.device) {
       form.name = props.device.name
-      form.serialNumber = props.device.serialNumber
+      form.serialNumber = props.device.serialNumber || ''
       form.model = props.device.model || ''
       form.manufacturer = props.device.manufacturer || ''
       form.categoryId = props.device.categoryId
@@ -105,8 +105,8 @@ function resetForm() {
         <input v-model="form.name" id="name" type="text" placeholder="Ví dụ: MacBook Pro 2023" />
       </AppFormControl>
 
-      <AppFormControl label="Số Serial" id="serial" required>
-        <input v-model="form.serialNumber" id="serial" type="text" placeholder="Nhập số Serial..." />
+      <AppFormControl label="Số Serial (nếu có)" id="serial">
+        <input v-model="form.serialNumber" id="serial" type="text" placeholder="Nhập số Serial nếu có..." />
       </AppFormControl>
 
       <AppFormControl label="Danh mục" id="category" required>

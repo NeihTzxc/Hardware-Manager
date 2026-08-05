@@ -23,8 +23,9 @@ function handleConfirm() {
 </script>
 
 <template>
-    <div class="modal-overlay fade-in" @click.self="emit('cancel')">
-        <div class="confirm-dialog scale-in">
+    <Teleport to="body">
+        <div class="modal-overlay fade-in" @click.self="emit('cancel')">
+            <div class="confirm-dialog scale-in">
             <div class="dialog-header" :class="{ 'destructive': isDestructive }">
                 <div class="icon-circle">
                     <svg v-if="isDestructive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -54,8 +55,9 @@ function handleConfirm() {
                     {{ confirmText || 'Xác nhận' }}
                 </button>
             </div>
+            </div>
         </div>
-    </div>
+    </Teleport>
 </template>
 
 <style scoped>
@@ -64,7 +66,7 @@ function handleConfirm() {
     inset: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 300;
+    z-index: var(--z-modal);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -17,7 +17,6 @@ const id = route.params.id as string
 
 const device = ref<any>(null)
 const loading = ref(true)
-const activeTab = ref('assignments')
 
 const isEditModalOpen = ref(false)
 const isBorrowModalOpen = ref(false)
@@ -28,6 +27,7 @@ const tabs = [
   { id: 'components', label: 'Linh kiện', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' },
   { id: 'history', label: 'Lịch sử chỉnh sửa', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' }
 ]
+const activeTab = useHashTab('assignments', tabs.map(tab => tab.id))
 
 async function fetchDevice() {
   loading.value = true

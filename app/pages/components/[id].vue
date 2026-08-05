@@ -15,11 +15,11 @@ const id = route.params.id as string
 
 const component = ref<any>(null)
 const loading = ref(true)
-const activeTab = ref('installations')
 
 const tabs = [
   { id: 'installations', label: 'Lịch sử lắp đặt' }
 ]
+const activeTab = useHashTab('installations', tabs.map(tab => tab.id))
 
 async function fetchComponent() {
   loading.value = true

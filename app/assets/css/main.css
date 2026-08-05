@@ -102,6 +102,9 @@ html.light-mode {
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
   --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
 
+  /* Layering: dialogs must cover navigation and transient notifications. */
+  --z-modal: 10000;
+
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
@@ -270,4 +273,3 @@ html.light-mode * {
   flex: 1;
   overflow: auto;
 }
-

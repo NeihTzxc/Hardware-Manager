@@ -13,7 +13,7 @@ definePageMeta({
 })
 
 const api = useApi()
-const activeTab = ref<'domains' | 'ssl'>('domains')
+const activeTab = useHashTab('domains', ['domains', 'ssl'])
 const loading = ref(true)
 const searchQuery = ref('')
 const statusFilter = ref('')

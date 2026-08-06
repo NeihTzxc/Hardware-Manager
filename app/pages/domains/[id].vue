@@ -19,7 +19,6 @@ const id = route.params.id as string
 
 const domain = ref<any>(null)
 const loading = ref(true)
-const activeTab = ref('ssl')
 
 const isEditModalOpen = ref(false)
 const isSslModalOpen = ref(false)
@@ -30,6 +29,7 @@ const tabs = [
   { id: 'dns', label: 'Cấu hình DNS', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>' },
   { id: 'history', label: 'Lịch sử hoạt động', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' }
 ]
+const activeTab = useHashTab('ssl', tabs.map(tab => tab.id))
 
 async function fetchDomain() {
   loading.value = true

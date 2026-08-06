@@ -14,7 +14,7 @@ definePageMeta({
 
 const router = useRouter()
 const api = useApi()
-const activeTab = ref<'software' | 'licenses'>('software')
+const activeTab = useHashTab('software', ['software', 'licenses'])
 const loading = ref(true)
 const searchQuery = ref('')
 const categoryFilter = ref('')

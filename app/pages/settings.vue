@@ -14,7 +14,6 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const activeTab = ref('users')
 
 const tabs = [
   {
@@ -38,6 +37,7 @@ const tabs = [
     icon: DatabaseIcon
   }
 ]
+const activeTab = useHashTab('users', tabs.map(tab => tab.id))
 </script>
 
 <template>

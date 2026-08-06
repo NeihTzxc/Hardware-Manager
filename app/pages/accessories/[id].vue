@@ -15,11 +15,11 @@ const id = route.params.id as string
 
 const accessory = ref<any>(null)
 const loading = ref(true)
-const activeTab = ref('checkouts')
 
 const tabs = [
   { id: 'checkouts', label: 'Lịch sử cấp phát' }
 ]
+const activeTab = useHashTab('checkouts', tabs.map(tab => tab.id))
 
 async function fetchAccessory() {
   loading.value = true

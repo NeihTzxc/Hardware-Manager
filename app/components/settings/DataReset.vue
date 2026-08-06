@@ -99,7 +99,7 @@ async function resetData() {
 .danger-content p { max-width: 650px; }
 .reset-button, .confirm-button { border: 0; border-radius: var(--radius-md); padding: 10px 16px; color: #fff; background: var(--color-error); font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; }
 .reset-button:hover, .confirm-button:not(:disabled):hover { background: #dc2626; }
-.modal-overlay { position: fixed; inset: 0; z-index: 300; display: grid; place-items: center; padding: var(--spacing-md); background: rgba(0, 0, 0, .65); backdrop-filter: blur(4px); }
+.modal-overlay { position: fixed; inset: 0; z-index: var(--z-modal); display: grid; place-items: center; padding: var(--spacing-md); background: rgba(0, 0, 0, .65); backdrop-filter: blur(4px); }
 .reset-dialog { width: min(100%, 480px); padding: var(--spacing-xl); border: 1px solid var(--color-border); border-radius: var(--radius-xl); background: var(--color-bg-card); box-shadow: var(--shadow-xl); }
 .dialog-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: var(--spacing-md); border-radius: 50%; color: var(--color-error); background: rgba(239, 68, 68, .12); }
 .dialog-icon svg { width: 24px; height: 24px; }

@@ -14,7 +14,6 @@ const id = route.params.id as string
 
 const category = ref<any>(null)
 const loading = ref(true)
-const activeTab = ref('devices')
 
 const tabs = computed(() => {
   const t = []
@@ -27,6 +26,7 @@ const tabs = computed(() => {
   }
   return t
 })
+const activeTab = useHashTab('devices', computed(() => tabs.value.map(tab => tab.id)))
 
 async function fetchCategory() {
   loading.value = true
@@ -34,10 +34,6 @@ async function fetchCategory() {
     const data = await api<{ success: boolean; category: any }>(`/api/categories/${id}`)
     category.value = data.category
     
-    // Set default tab based on type
-    if (category.value.type === 'DEVICE') activeTab.value = 'devices'
-    else if (category.value.type === 'COMPONENT') activeTab.value = 'components'
-    else if (category.value.type === 'ACCESSORY') activeTab.value = 'accessories'
   } catch (err) {
     console.error('Fetch category detail error:', err)
   } finally {

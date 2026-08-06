@@ -68,8 +68,9 @@ async function submitForm() {
 </script>
 
 <template>
-  <div class="modal-overlay fade-in" @click.self="emit('close')">
-    <div class="modal-content slide-in-top">
+  <Teleport to="body">
+    <div class="modal-overlay fade-in" @click.self="emit('close')">
+      <div class="modal-content slide-in-top">
       <div class="modal-header">
         <h3 class="modal-title">{{ isEdit ? 'Chỉnh sửa người dùng' : 'Thêm người dùng mới' }}</h3>
         <button class="close-btn" @click="emit('close')">
@@ -119,8 +120,9 @@ async function submitForm() {
           </button>
         </div>
       </form>
+      </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <style scoped>
@@ -129,7 +131,7 @@ async function submitForm() {
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
-  z-index: 200;
+  z-index: var(--z-modal);
   display: flex;
   align-items: center;
   justify-content: center;

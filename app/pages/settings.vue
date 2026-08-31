@@ -41,7 +41,7 @@ const activeTab = useHashTab('users', tabs.map(tab => tab.id))
 </script>
 
 <template>
-  <div class="page-container fade-in">
+  <div class="page-container wide fade-in">
     <div class="page-header">
       <div>
         <h1 class="page-title">Cài đặt</h1>

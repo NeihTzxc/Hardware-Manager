@@ -2,6 +2,7 @@
 import AppButton from '~/components/ui/AppButton.vue'
 import AppDialog from '~/components/ui/AppDialog.vue'
 import AppFormControl from '~/components/ui/AppFormControl.vue'
+import { formatMoneyInput, normalizeMoneyInput } from '~/utils/money'
 
 interface Props {
   modelValue: boolean
@@ -25,6 +26,10 @@ const modalTitle = computed(() => isEdit.value ? 'Sửa thông tin giấy phép'
 const submitLabel = computed(() => isEdit.value ? 'Cập nhật' : 'Lưu')
 
 const loading = ref(false)
+
+function updateMoney(field: 'cost', event: Event) {
+  form[field] = normalizeMoneyInput((event.target as HTMLInputElement).value)
+}
 const softwareList = ref<any[]>([])
 const form = reactive({
   softwareId: props.softwareId || '',
@@ -165,7 +170,8 @@ function resetForm() {
       </AppFormControl>
 
       <AppFormControl label="Chi phí" id="cost">
-        <input v-model="form.cost" id="cost" type="number" step="0.01" placeholder="Nhập số tiền..." />
+        <input :value="formatMoneyInput(form.cost)" @input="updateMoney('cost', $event)"
+          id="cost" type="text" inputmode="numeric" placeholder="Ví dụ: 2.500.000 VNĐ" />
       </AppFormControl>
 
       <AppFormControl label="Ghi chú" id="notes" class="md:col-span-2">

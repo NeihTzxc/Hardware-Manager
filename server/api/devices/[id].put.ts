@@ -1,4 +1,5 @@
 import { AuditAction, AuditEntity, logAudit } from '../../utils/audit'
+import { parseMoney } from '../../utils/money'
 
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
@@ -59,7 +60,13 @@ export default defineEventHandler(async (event) => {
                 manufacturer: body.manufacturer || null,
                 categoryId: body.categoryId,
                 status: body.status || device.status,
-                condition: body.condition || device.condition
+                condition: body.condition || device.condition,
+                purchaseDate: body.purchaseDate ? new Date(body.purchaseDate) : null,
+                purchasePrice: parseMoney(body.purchasePrice),
+                warrantyExpiry: body.warrantyExpiry ? new Date(body.warrantyExpiry) : null,
+                notes: body.notes || null,
+                supplierId: body.supplierId || null,
+                locationId: body.locationId || null
             }
         })
 

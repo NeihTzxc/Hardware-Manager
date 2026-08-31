@@ -2,6 +2,7 @@
 import AppButton from '~/components/ui/AppButton.vue'
 import AppDialog from '~/components/ui/AppDialog.vue'
 import AppFormControl from '~/components/ui/AppFormControl.vue'
+import { formatMoneyInput, normalizeMoneyInput } from '~/utils/money'
 
 interface Props {
   modelValue: boolean
@@ -35,6 +36,10 @@ const form = reactive({
 })
 
 const categories = ref<{ id: string; name: string }[]>([])
+
+function updateMoney(field: 'unitPrice', event: Event) {
+  form[field] = normalizeMoneyInput((event.target as HTMLInputElement).value)
+}
 
 async function fetchCategories() {
   try {
@@ -129,7 +134,8 @@ function resetForm() {
       </AppFormControl>
 
       <AppFormControl label="Đơn giá (VNĐ)" id="acc-price" class="md:col-span-2">
-        <input v-model="form.unitPrice" id="acc-price" type="number" placeholder="VNĐ" />
+        <input :value="formatMoneyInput(form.unitPrice)" @input="updateMoney('unitPrice', $event)"
+          id="acc-price" type="text" inputmode="numeric" placeholder="Ví dụ: 4.200.000 VNĐ" />
       </AppFormControl>
 
       <AppFormControl label="Ghi chú" id="acc-notes" class="md:col-span-2">

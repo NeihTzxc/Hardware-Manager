@@ -1,4 +1,5 @@
 import { AuditAction, AuditEntity, logAudit } from '../../utils/audit'
+import { parseMoney } from '../../utils/money'
 
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
@@ -27,7 +28,7 @@ export default defineEventHandler(async (event) => {
                 assignedTo: body.assignedTo,
                 purchasedAt: body.purchasedAt ? new Date(body.purchasedAt) : null,
                 expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
-                cost: parseFloat(body.cost),
+                cost: parseMoney(body.cost),
                 notes: body.notes
             }
         })

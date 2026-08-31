@@ -41,7 +41,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="page-container fade-in">
+  <div class="page-container wide fade-in">
     <div class="detail-header">
       <div class="flex items-center gap-4">
         <button class="back-btn" @click="router.back()">

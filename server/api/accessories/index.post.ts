@@ -1,3 +1,5 @@
+import { parseMoney } from '../../utils/money'
+
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
 
@@ -24,7 +26,7 @@ export default defineEventHandler(async (event) => {
                 manufacturer: body.manufacturer || null,
                 totalQuantity: parseInt(body.totalQuantity),
                 minQuantity: body.minQuantity ? parseInt(body.minQuantity) : 0,
-                unitPrice: body.unitPrice ? parseFloat(body.unitPrice) : null,
+                unitPrice: parseMoney(body.unitPrice),
                 notes: body.notes || null,
                 supplierId: body.supplierId || null,
                 locationId: body.locationId || null

@@ -1,4 +1,5 @@
 import { AuditAction, AuditEntity, logAudit } from '../../utils/audit'
+import { parseMoney } from '../../utils/money'
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event)
@@ -33,8 +34,14 @@ export default defineEventHandler(async (event) => {
                 model: body.model || null,
                 manufacturer: body.manufacturer || null,
                 categoryId: body.categoryId,
-                status: 'AVAILABLE',
-                condition: 'NEW'
+                status: body.status || 'AVAILABLE',
+                condition: body.condition || 'NEW',
+                purchaseDate: body.purchaseDate ? new Date(body.purchaseDate) : null,
+                purchasePrice: parseMoney(body.purchasePrice),
+                warrantyExpiry: body.warrantyExpiry ? new Date(body.warrantyExpiry) : null,
+                notes: body.notes || null,
+                supplierId: body.supplierId || null,
+                locationId: body.locationId || null
             }
         })
 

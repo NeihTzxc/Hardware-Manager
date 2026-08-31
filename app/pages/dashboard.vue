@@ -50,7 +50,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="page-container fade-in">
+  <div class="page-container wide fade-in">
     <div class="page-header">
       <h1 class="page-title">Dashboard</h1>
       <p class="page-subtitle">Tổng quan hệ thống quản lý thiết bị</p>

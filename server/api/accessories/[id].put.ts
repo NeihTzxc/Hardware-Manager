@@ -1,3 +1,5 @@
+import { parseMoney } from '../../utils/money'
+
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
     const body = await readBody(event)
@@ -34,7 +36,7 @@ export default defineEventHandler(async (event) => {
                 manufacturer: body.manufacturer || null,
                 totalQuantity: body.totalQuantity !== undefined ? parseInt(body.totalQuantity) : existing.totalQuantity,
                 minQuantity: body.minQuantity !== undefined ? parseInt(body.minQuantity) : existing.minQuantity,
-                unitPrice: body.unitPrice ? parseFloat(body.unitPrice) : null,
+                unitPrice: parseMoney(body.unitPrice),
                 notes: body.notes || null,
                 supplierId: body.supplierId || null,
                 locationId: body.locationId || null

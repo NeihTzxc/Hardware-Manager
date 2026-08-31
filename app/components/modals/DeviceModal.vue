@@ -2,6 +2,7 @@
 import AppButton from '~/components/ui/AppButton.vue'
 import AppDialog from '~/components/ui/AppDialog.vue'
 import AppFormControl from '~/components/ui/AppFormControl.vue'
+import { formatMoneyInput, normalizeMoneyInput } from '~/utils/money'
 
 interface Props {
   modelValue: boolean
@@ -30,10 +31,23 @@ const form = reactive({
   model: '',
   manufacturer: '',
   categoryId: '',
-  status: 'AVAILABLE'
+  status: 'AVAILABLE',
+  condition: 'NEW',
+  supplierId: '',
+  locationId: '',
+  purchaseDate: '',
+  purchasePrice: '',
+  warrantyExpiry: '',
+  notes: ''
 })
 
 const categories = ref<{ id: string; name: string }[]>([])
+const suppliers = ref<{ id: string; name: string }[]>([])
+const locations = ref<{ id: string; name: string }[]>([])
+
+function updateMoney(field: 'purchasePrice', event: Event) {
+  form[field] = normalizeMoneyInput((event.target as HTMLInputElement).value)
+}
 
 // Fetch categories from API
 async function fetchCategories() {
@@ -45,9 +59,23 @@ async function fetchCategories() {
   }
 }
 
+async function fetchReferences() {
+  try {
+    const [supplierData, locationData] = await Promise.all([
+      api<{ success: boolean; suppliers: any[] }>('/api/suppliers'),
+      api<{ success: boolean; locations: any[] }>('/api/locations')
+    ])
+    suppliers.value = supplierData.suppliers
+    locations.value = locationData.locations
+  } catch (err) {
+    console.error('Fetch device references error:', err)
+  }
+}
+
 watch(() => props.modelValue, (newVal) => {
   if (newVal) {
     fetchCategories()
+    fetchReferences()
     if (props.device) {
       form.name = props.device.name
       form.serialNumber = props.device.serialNumber || ''
@@ -55,6 +83,13 @@ watch(() => props.modelValue, (newVal) => {
       form.manufacturer = props.device.manufacturer || ''
       form.categoryId = props.device.categoryId
       form.status = props.device.status
+      form.condition = props.device.condition || 'NEW'
+      form.supplierId = props.device.supplierId || ''
+      form.locationId = props.device.locationId || ''
+      form.purchaseDate = props.device.purchaseDate ? props.device.purchaseDate.slice(0, 10) : ''
+      form.purchasePrice = props.device.purchasePrice?.toString() || ''
+      form.warrantyExpiry = props.device.warrantyExpiry ? props.device.warrantyExpiry.slice(0, 10) : ''
+      form.notes = props.device.notes || ''
     } else {
       resetForm()
     }
@@ -95,11 +130,18 @@ function resetForm() {
   form.manufacturer = ''
   form.categoryId = ''
   form.status = 'AVAILABLE'
+  form.condition = 'NEW'
+  form.supplierId = ''
+  form.locationId = ''
+  form.purchaseDate = ''
+  form.purchasePrice = ''
+  form.warrantyExpiry = ''
+  form.notes = ''
 }
 </script>
 
 <template>
-  <AppDialog v-model="isVisible" :title="modalTitle" size="md" @close="resetForm">
+  <AppDialog v-model="isVisible" :title="modalTitle" size="lg" @close="resetForm">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <AppFormControl label="Tên thiết bị" id="name" required class="md:col-span-2">
         <input v-model="form.name" id="name" type="text" placeholder="Ví dụ: MacBook Pro 2023" />
@@ -134,6 +176,51 @@ function resetForm() {
           <option value="RETIRED">Ngừng sử dụng</option>
           <option value="LOST">Mất</option>
         </select>
+      </AppFormControl>
+
+      <AppFormControl label="Tình trạng" id="condition">
+        <select v-model="form.condition" id="condition">
+          <option value="NEW">Mới</option>
+          <option value="GOOD">Tốt</option>
+          <option value="FAIR">Bình thường</option>
+          <option value="POOR">Kém</option>
+          <option value="DAMAGED">Hỏng</option>
+        </select>
+      </AppFormControl>
+
+      <AppFormControl label="Nhà cung cấp" id="supplier">
+        <select v-model="form.supplierId" id="supplier">
+          <option value="">Chưa xác định</option>
+          <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">
+            {{ supplier.name }}
+          </option>
+        </select>
+      </AppFormControl>
+
+      <AppFormControl label="Vị trí lưu trữ" id="location">
+        <select v-model="form.locationId" id="location">
+          <option value="">Chưa xác định</option>
+          <option v-for="location in locations" :key="location.id" :value="location.id">
+            {{ location.name }}
+          </option>
+        </select>
+      </AppFormControl>
+
+      <AppFormControl label="Giá mua" id="purchase-price">
+        <input :value="formatMoneyInput(form.purchasePrice)" @input="updateMoney('purchasePrice', $event)"
+          id="purchase-price" type="text" inputmode="numeric" placeholder="Ví dụ: 18.500.000 VNĐ" />
+      </AppFormControl>
+
+      <AppFormControl label="Ngày mua" id="purchase-date">
+        <input v-model="form.purchaseDate" id="purchase-date" type="date" />
+      </AppFormControl>
+
+      <AppFormControl label="Hạn bảo hành" id="warranty-expiry">
+        <input v-model="form.warrantyExpiry" id="warranty-expiry" type="date" />
+      </AppFormControl>
+
+      <AppFormControl label="Ghi chú" id="device-notes" class="md:col-span-2">
+        <textarea v-model="form.notes" id="device-notes" rows="3" placeholder="Thông tin thêm về thiết bị..."></textarea>
       </AppFormControl>
     </div>
 

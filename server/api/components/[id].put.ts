@@ -1,3 +1,5 @@
+import { parseMoney } from '../../utils/money'
+
 export default defineEventHandler(async (event) => {
     const id = getRouterParam(event, 'id')
     const body = await readBody(event)
@@ -35,7 +37,7 @@ export default defineEventHandler(async (event) => {
                 manufacturer: body.manufacturer || null,
                 status: body.status || existing.status,
                 purchaseDate: body.purchaseDate ? new Date(body.purchaseDate) : null,
-                purchasePrice: body.purchasePrice ? parseFloat(body.purchasePrice) : null,
+                purchasePrice: parseMoney(body.purchasePrice),
                 warrantyExpiry: body.warrantyExpiry ? new Date(body.warrantyExpiry) : null,
                 notes: body.notes || null,
                 supplierId: body.supplierId || null,

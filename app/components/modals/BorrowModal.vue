@@ -7,6 +7,7 @@ import DeviceIcon from '~/components/ui/icons/DeviceIcon.vue'
 interface Props {
   modelValue: boolean
   device?: any
+  transfer?: boolean
 }
 
 const props = defineProps<Props>()
@@ -19,6 +20,8 @@ const isVisible = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
 })
+
+const isTransfer = computed(() => props.transfer === true)
 
 const loading = ref(false)
 const users = ref<any[]>([])
@@ -61,19 +64,25 @@ async function handleBorrow() {
 
   loading.value = true
   try {
-    const data = await api<{ success: boolean }>('/api/assignments', {
+    const url = isTransfer.value
+      ? `/api/devices/${props.device.id}/transfer`
+      : '/api/assignments'
+
+    const data = await api<{ success: boolean }>(url, {
       method: 'POST',
       body: form
     })
 
     if (data.success) {
-      success('Thành công', 'Thiết bị đã được cấp phát thành công')
+      success('Thành công', isTransfer.value
+        ? 'Đã đổi người sử dụng thiết bị'
+        : 'Thiết bị đã được cấp phát thành công')
       emit('save')
       isVisible.value = false
       resetForm()
     }
   } catch (err: any) {
-    const msg = err.data?.message || 'Có lỗi xảy ra khi thực hiện mượn thiết bị'
+    const msg = err.data?.message || `Có lỗi xảy ra khi ${isTransfer.value ? 'đổi người sử dụng' : 'mượn thiết bị'}`
     notifyError('Lỗi', msg)
   } finally {
     loading.value = false
@@ -87,7 +96,7 @@ function resetForm() {
 </script>
 
 <template>
-  <AppDialog v-model="isVisible" title="Mượn thiết bị" size="md" @close="resetForm">
+  <AppDialog v-model="isVisible" :title="isTransfer ? 'Đổi người sử dụng' : 'Mượn thiết bị'" size="md" @close="resetForm">
     <div class="space-y-4">
       <div v-if="device" class="device-preview p-3 bg-surface rounded-lg border border-border flex items-center gap-3">
         <div class="p-2 bg-accent/10 rounded">
@@ -99,7 +108,7 @@ function resetForm() {
         </div>
       </div>
 
-      <AppFormControl label="Người nhận thiết bị" id="user" required>
+      <AppFormControl :label="isTransfer ? 'Người sử dụng mới' : 'Người nhận thiết bị'" id="user" required>
         <select v-model="form.userId" id="user">
           <option value="" disabled selected>Chọn người nhận...</option>
           <option v-for="user in users" :key="user.id" :value="user.id">
@@ -122,7 +131,7 @@ function resetForm() {
 
     <template #footer>
       <AppButton label="Hủy" variant="ghost" @click="isVisible = false" />
-      <AppButton label="Xác nhận mượn" variant="primary" :loading="loading" @click="handleBorrow" />
+      <AppButton :label="isTransfer ? 'Xác nhận đổi người' : 'Xác nhận mượn'" variant="primary" :loading="loading" @click="handleBorrow" />
     </template>
   </AppDialog>
 </template>

@@ -126,7 +126,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="page-container fade-in">
+  <div class="page-container wide fade-in">
     <!-- Header/Navigation -->
     <div class="detail-header">
       <div class="flex items-center gap-4">
@@ -147,6 +147,7 @@ onMounted(() => {
       <div class="header-actions" v-if="device">
         <AppButton label="Sửa thông tin" variant="secondary" @click="isEditModalOpen = true" />
         <AppButton v-if="device.status === 'AVAILABLE'" label="Cấp phát (Mượn)" variant="primary" @click="isBorrowModalOpen = true" />
+        <AppButton v-else-if="device.status === 'IN_USE'" label="Đổi người sử dụng" variant="primary" @click="isBorrowModalOpen = true" />
       </div>
     </div>
 
@@ -358,7 +359,8 @@ onMounted(() => {
 
     <!-- Modals -->
     <DeviceModal v-if="device" v-model="isEditModalOpen" :device="device" @save="onDeviceSave" />
-    <BorrowModal v-if="device" v-model="isBorrowModalOpen" :device="device" @save="onDeviceSave" />
+    <BorrowModal v-if="device" v-model="isBorrowModalOpen" :device="device"
+      :transfer="device.status === 'IN_USE'" @save="onDeviceSave" />
   </div>
 </template>
 

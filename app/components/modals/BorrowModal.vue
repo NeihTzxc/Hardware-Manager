@@ -69,7 +69,7 @@ async function handleBorrow() {
       : '/api/assignments'
 
     const data = await api<{ success: boolean }>(url, {
-      method: 'POST',
+      method: isTransfer.value ? 'PUT' : 'POST',
       body: form
     })
 

@@ -5,6 +5,7 @@ import BorrowModal from '~/components/modals/BorrowModal.vue'
 import ImportModal from '~/components/modals/ImportModal.vue'
 import SearchIcon from '~/components/ui/icons/SearchIcon.vue'
 import DeviceIcon from '~/components/ui/icons/DeviceIcon.vue'
+import { formatMoneyInput, normalizeMoneyInput } from '~/utils/money'
 
 definePageMeta({
   layout: 'dashboard',
@@ -26,6 +27,38 @@ const categories = ref<any[]>([])
 const loading = ref(false)
 const sortField = ref('createdAt')
 const sortOrder = ref<'asc' | 'desc'>('desc')
+const isFilterPanelOpen = ref(false)
+const filterField = ref('')
+const filterValue = ref('')
+const appliedFilters = ref<Record<string, string>>({})
+const users = ref<any[]>([])
+const suppliers = ref<any[]>([])
+const locations = ref<any[]>([])
+
+const filterFields = [
+  { label: 'Tên thiết bị', value: 'name', type: 'text' },
+  { label: 'Mã thiết bị', value: 'id', type: 'text' },
+  { label: 'Số serial', value: 'serialNumber', type: 'text' },
+  { label: 'Model', value: 'model', type: 'text' },
+  { label: 'Hãng sản xuất', value: 'manufacturer', type: 'text' },
+  { label: 'Ghi chú', value: 'notes', type: 'text' },
+  { label: 'Danh mục', value: 'categoryId', type: 'category' },
+  { label: 'Trạng thái', value: 'status', type: 'status' },
+  { label: 'Tình trạng', value: 'condition', type: 'condition' },
+  { label: 'Người đang sử dụng', value: 'userId', type: 'user' },
+  { label: 'Nhà cung cấp', value: 'supplierId', type: 'supplier' },
+  { label: 'Vị trí', value: 'locationId', type: 'location' },
+  { label: 'Giá mua từ', value: 'purchasePriceMin', type: 'money' },
+  { label: 'Giá mua đến', value: 'purchasePriceMax', type: 'money' },
+  { label: 'Ngày mua từ', value: 'purchaseDateFrom', type: 'date' },
+  { label: 'Ngày mua đến', value: 'purchaseDateTo', type: 'date' }
+]
+
+const conditionOptions = [
+  { label: 'Mới', value: 'NEW' }, { label: 'Tốt', value: 'GOOD' },
+  { label: 'Bình thường', value: 'FAIR' }, { label: 'Kém', value: 'POOR' },
+  { label: 'Hỏng', value: 'DAMAGED' }
+]
 
 const statusOptions = [
   { label: 'Tất cả trạng thái', value: '' },
@@ -47,6 +80,21 @@ async function fetchCategories() {
   }
 }
 
+async function fetchFilterReferences() {
+  try {
+    const [userData, supplierData, locationData] = await Promise.all([
+      api<{ success: boolean; data: any[] }>('/api/users'),
+      api<{ success: boolean; suppliers: any[] }>('/api/suppliers'),
+      api<{ success: boolean; locations: any[] }>('/api/locations')
+    ])
+    users.value = userData.data
+    suppliers.value = supplierData.suppliers
+    locations.value = locationData.locations
+  } catch (err) {
+    console.error('Fetch device filter references error:', err)
+  }
+}
+
 async function fetchDevices() {
   loading.value = true
   try {
@@ -55,6 +103,7 @@ async function fetchDevices() {
         q: searchQuery.value,
         categoryId: selectedCategory.value || undefined,
         status: selectedStatus.value || undefined,
+        ...appliedFilters.value,
         field: sortField.value,
         value: sortOrder.value
       }
@@ -81,6 +130,8 @@ watch([selectedCategory, selectedStatus, sortField, sortOrder], () => {
   fetchDevices()
 })
 
+watch(appliedFilters, () => fetchDevices(), { deep: true })
+
 function handleSort(field: string) {
   if (sortField.value === field) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
@@ -94,6 +145,42 @@ function clearFilters() {
   searchQuery.value = ''
   selectedCategory.value = ''
   selectedStatus.value = ''
+  appliedFilters.value = {}
+  filterField.value = ''
+  filterValue.value = ''
+}
+
+function applyFilter() {
+  if (!filterField.value || !filterValue.value) return
+  appliedFilters.value[filterField.value] = filterValue.value
+  filterValue.value = ''
+}
+
+function removeFilter(field: string) {
+  delete appliedFilters.value[field]
+}
+
+function filterLabel(field: string) {
+  return filterFields.find(item => item.value === field)?.label || field
+}
+
+function filterDisplayValue(field: string, value: string) {
+  const type = filterFields.find(item => item.value === field)?.type
+  if (type === 'money') return `${formatMoneyInput(value)} ₫`
+  if (type === 'category') return categories.value.find(item => item.id === value)?.name || value
+  if (type === 'status') return statusOptions.find(item => item.value === value)?.label || value
+  if (type === 'condition') return conditionOptions.find(item => item.value === value)?.label || value
+  if (type === 'user') {
+    const user = users.value.find(item => item.id === value)
+    return user?.name || user?.email || value
+  }
+  if (type === 'supplier') return suppliers.value.find(item => item.id === value)?.name || value
+  if (type === 'location') return locations.value.find(item => item.id === value)?.name || value
+  return value
+}
+
+function updateFilterMoney(event: Event) {
+  filterValue.value = normalizeMoneyInput((event.target as HTMLInputElement).value)
 }
 
 function onDeviceSave() {
@@ -137,6 +224,7 @@ function goToDetail(id: string) {
 onMounted(() => {
   fetchDevices()
   fetchCategories()
+  fetchFilterReferences()
 })
 
 const getStatusLabel = (status: string) => {
@@ -150,7 +238,7 @@ const getStatusLabel = (status: string) => {
   return labels[status] || status
 }
 const isFiltered = computed(() => {
-  return searchQuery.value || selectedCategory.value || selectedStatus.value
+  return searchQuery.value || selectedCategory.value || selectedStatus.value || Object.keys(appliedFilters.value).length > 0
 })
 </script>
 
@@ -182,8 +270,61 @@ const isFiltered = computed(() => {
           <SearchIcon :size="16" class="search-icon" />
           <input v-model="searchQuery" type="text" placeholder="Tìm kiếm..." class="search-input" />
         </div>
+        <AppButton label="Lọc" variant="secondary" @click="isFilterPanelOpen = !isFilterPanelOpen" />
         <AppButton label="Nhập Excel" variant="secondary" @click="isImportModalOpen = true" />
         <AppButton label="Thêm thiết bị" variant="primary" @click="isAddModalOpen = true" />
+      </div>
+    </div>
+
+    <div v-if="isFilterPanelOpen" class="advanced-filter-panel">
+      <div class="advanced-filter-form">
+        <select v-model="filterField" class="custom-select">
+          <option value="">Chọn trường cần lọc...</option>
+          <option v-for="field in filterFields" :key="field.value" :value="field.value">
+            {{ field.label }}
+          </option>
+        </select>
+
+        <select v-if="filterFields.find(f => f.value === filterField)?.type === 'category'" v-model="filterValue" class="custom-select">
+          <option value="">Chọn danh mục...</option>
+          <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+        </select>
+        <select v-else-if="filterFields.find(f => f.value === filterField)?.type === 'status'" v-model="filterValue" class="custom-select">
+          <option value="">Chọn trạng thái...</option>
+          <option v-for="item in statusOptions.slice(1)" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+        <select v-else-if="filterFields.find(f => f.value === filterField)?.type === 'condition'" v-model="filterValue" class="custom-select">
+          <option value="">Chọn tình trạng...</option>
+          <option v-for="item in conditionOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+        </select>
+        <select v-else-if="filterFields.find(f => f.value === filterField)?.type === 'user'" v-model="filterValue" class="custom-select">
+          <option value="">Chọn người sử dụng...</option>
+          <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name || user.email }}</option>
+        </select>
+        <select v-else-if="filterFields.find(f => f.value === filterField)?.type === 'supplier'" v-model="filterValue" class="custom-select">
+          <option value="">Chọn nhà cung cấp...</option>
+          <option v-for="supplier in suppliers" :key="supplier.id" :value="supplier.id">{{ supplier.name }}</option>
+        </select>
+        <select v-else-if="filterFields.find(f => f.value === filterField)?.type === 'location'" v-model="filterValue" class="custom-select">
+          <option value="">Chọn vị trí...</option>
+          <option v-for="location in locations" :key="location.id" :value="location.id">{{ location.name }}</option>
+        </select>
+        <input v-else-if="filterFields.find(f => f.value === filterField)?.type === 'money'"
+          :value="formatMoneyInput(filterValue)" @input="updateFilterMoney" class="filter-value-input"
+          type="text" inputmode="numeric" placeholder="Nhập số tiền..." />
+        <input v-else-if="filterFields.find(f => f.value === filterField)?.type === 'date'"
+          v-model="filterValue" class="filter-value-input" type="date" />
+        <input v-else v-model="filterValue" class="filter-value-input" type="text" placeholder="Nhập giá trị cần lọc..." />
+
+        <AppButton label="Áp dụng" variant="primary" @click="applyFilter" />
+      </div>
+
+      <div v-if="Object.keys(appliedFilters).length" class="active-filter-list">
+        <span v-for="(value, field) in appliedFilters" :key="field" class="active-filter-chip">
+          {{ filterLabel(field) }}: {{ filterDisplayValue(field, value) }}
+          <button type="button" @click="removeFilter(field)">×</button>
+        </span>
+        <button type="button" class="clear-filter-link" @click="clearFilters">Xóa tất cả</button>
       </div>
     </div>
 
@@ -233,6 +374,7 @@ const isFiltered = computed(() => {
                 <span v-else class="sort-icon invisible group-hover:visible">↕</span>
               </div>
             </th>
+            <th>Người sử dụng</th>
             <th class="text-right">Hành động</th>
           </tr>
         </thead>
@@ -258,6 +400,9 @@ const isFiltered = computed(() => {
               <span :class="['status-badge', `status-${device.status.toLowerCase()}`]">
                 {{ getStatusLabel(device.status) }}
               </span>
+            </td>
+            <td>
+              {{ device.assignments?.[0]?.user?.name || device.assignments?.[0]?.user?.email || '—' }}
             </td>
             <td>
               <div class="flex justify-end gap-2">
@@ -356,6 +501,76 @@ const isFiltered = computed(() => {
 .filter-group {
   display: flex;
   gap: var(--spacing-sm);
+}
+
+.advanced-filter-panel {
+  margin-top: calc(var(--spacing-lg) * -1);
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg);
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.advanced-filter-form {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.filter-value-input {
+  min-width: 240px;
+  flex: 1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 8px 12px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+.filter-value-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.active-filter-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.active-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 9px;
+  border-radius: var(--radius-full);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xs);
+}
+
+.active-filter-chip button {
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.clear-filter-link {
+  border: 0;
+  background: transparent;
+  color: var(--color-accent);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
 }
 
 .custom-select {

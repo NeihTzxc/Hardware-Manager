@@ -97,7 +97,7 @@ async function main() {
         },
     })
 
-    await prisma.device.upsert({
+    const desktop = await prisma.device.upsert({
         where: { id: 'DEV-DEMO-002' },
         update: {},
         create: {
@@ -113,6 +113,24 @@ async function main() {
             supplierId: supplier.id,
             locationId: location.id,
             notes: 'Dữ liệu mẫu',
+        },
+    })
+
+    await prisma.assignment.upsert({
+        where: { id: 'ASM-DEMO-002' },
+        update: {
+            deviceId: desktop.id,
+            userId: user.id,
+            returnedAt: null,
+            conditionBefore: 'GOOD',
+            conditionAfter: null,
+        },
+        create: {
+            id: 'ASM-DEMO-002',
+            deviceId: desktop.id,
+            userId: user.id,
+            conditionBefore: 'GOOD',
+            notes: 'Lượt cấp phát mẫu',
         },
     })
 

@@ -34,14 +34,7 @@ export default defineEventHandler(async (event) => {
         }
 
         const currentAssignment = device.assignments[0]
-        if (!currentAssignment) {
-            throw createError({
-                statusCode: 400,
-                message: 'Thiết bị hiện không có người sử dụng đang hoạt động.'
-            })
-        }
-
-        if (currentAssignment.userId === body.userId) {
+        if (currentAssignment && currentAssignment.userId === body.userId) {
             throw createError({
                 statusCode: 400,
                 message: 'Người sử dụng mới trùng với người đang sử dụng.'
@@ -50,14 +43,16 @@ export default defineEventHandler(async (event) => {
 
         const condition = body.conditionBefore || device.condition
         const result = await db.$transaction(async (tx) => {
-            const returnedAssignment = await tx.assignment.update({
-                where: { id: currentAssignment.id },
-                data: {
-                    returnedAt: new Date(),
-                    conditionAfter: condition,
-                    notes: `${currentAssignment.notes || ''}\n[Đổi người sử dụng]`.trim()
-                }
-            })
+            const returnedAssignment = currentAssignment
+                ? await tx.assignment.update({
+                    where: { id: currentAssignment.id },
+                    data: {
+                        returnedAt: new Date(),
+                        conditionAfter: condition,
+                        notes: `${currentAssignment.notes || ''}\n[Đổi người sử dụng]`.trim()
+                    }
+                })
+                : null
 
             const newAssignment = await tx.assignment.create({
                 data: {
@@ -76,12 +71,14 @@ export default defineEventHandler(async (event) => {
             return { returnedAssignment, newAssignment }
         })
 
-        await logAudit(event, {
-            action: AuditAction.RETURN,
-            entity: AuditEntity.ASSIGNMENT,
-            entityId: result.returnedAssignment.id,
-            details: { reason: 'TRANSFER', oldUserId: currentAssignment.userId, newUserId: body.userId }
-        })
+        if (result.returnedAssignment && currentAssignment) {
+            await logAudit(event, {
+                action: AuditAction.RETURN,
+                entity: AuditEntity.ASSIGNMENT,
+                entityId: result.returnedAssignment.id,
+                details: { reason: 'TRANSFER', oldUserId: currentAssignment.userId, newUserId: body.userId }
+            })
+        }
         await logAudit(event, {
             action: AuditAction.ASSIGN,
             entity: AuditEntity.ASSIGNMENT,

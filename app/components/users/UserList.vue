@@ -2,11 +2,13 @@
 import { ref, onMounted } from 'vue'
 import UserModal from './UserModal.vue'
 import AppConfirmDialog from '~/components/ui/AppConfirmDialog.vue'
+import ReclaimDevicesModal from './ReclaimDevicesModal.vue'
 import { useAuthStore } from '~/stores/auth'
 import { useNotification } from '~/composables/useNotification'
 import PlusIcon from '~/components/ui/icons/PlusIcon.vue'
 import EditIcon from '~/components/ui/icons/EditIcon.vue'
 import TrashIcon from '~/components/ui/icons/TrashIcon.vue'
+import AssignmentIcon from '~/components/ui/icons/AssignmentIcon.vue'
 
 const authStore = useAuthStore()
 const notification = useNotification()
@@ -18,6 +20,10 @@ interface User {
   role: 'ADMIN' | 'USER'
   createdAt: string
   updatedAt: string
+  assignments: Array<{
+    id: string
+    device: { id: string; name: string; serialNumber: string | null; condition: string }
+  }>
 }
 
 const users = ref<User[]>([])
@@ -30,6 +36,8 @@ const selectedUser = ref<User | null>(null)
 // Confirm Dialog state
 const isConfirmOpen = ref(false)
 const userToDelete = ref<User | null>(null)
+const userToReclaim = ref<User | null>(null)
+const isReclaimModalOpen = ref(false)
 
 async function fetchUsers() {
   loading.value = true
@@ -62,6 +70,17 @@ function openEditModal(user: User) {
 function confirmDelete(user: User) {
   userToDelete.value = user
   isConfirmOpen.value = true
+}
+
+function openReclaimModal(user: User) {
+  userToReclaim.value = user
+  isReclaimModalOpen.value = true
+}
+
+function onReclaimSuccess(_count: number) {
+  isReclaimModalOpen.value = false
+  userToReclaim.value = null
+  fetchUsers()
 }
 
 function cancelDelete() {
@@ -134,6 +153,7 @@ function formatDate(dateStr: string) {
             <th>Tên / Initials</th>
             <th>Email</th>
             <th>Vai trò</th>
+            <th>Thiết bị đang giữ</th>
             <th>Ngày tạo</th>
             <th class="actions-col">Thao tác</th>
           </tr>
@@ -145,6 +165,10 @@ function formatDate(dateStr: string) {
                 <div class="avatar-sm">{{ (user.name || user.email).charAt(0).toUpperCase() }}</div>
                 <span class="user-name-text">{{ user.name || '—' }}</span>
               </div>
+            </td>
+            <td>
+              <span v-if="user.assignments.length" class="device-count">{{ user.assignments.length }} thiết bị</span>
+              <span v-else class="text-secondary">—</span>
             </td>
             <td><span class="text-secondary">{{ user.email }}</span></td>
             <td>
@@ -158,6 +182,9 @@ function formatDate(dateStr: string) {
                 v-if="authStore.user?.role === 'ADMIN' || authStore.user?.id === user.id">
                 <EditIcon :size="16" :stroke-width="1.8" />
               </button>
+              <button v-if="authStore.user?.role === 'ADMIN' && user.assignments.length" class="btn-icon text-warning" title="Thu hồi thiết bị khi nhân viên nghỉ việc" @click="openReclaimModal(user)">
+                <AssignmentIcon :size="16" :stroke-width="1.8" />
+              </button>
               <button class="btn-icon text-error" title="Xóa" @click="confirmDelete(user)"
                 v-if="authStore.user?.role === 'ADMIN' && authStore.user?.id !== user.id">
                 <TrashIcon :size="16" :stroke-width="1.8" />
@@ -170,6 +197,7 @@ function formatDate(dateStr: string) {
 
     <!-- Modal -->
     <UserModal v-if="isModalOpen" :user="selectedUser" @close="onModalClose" @success="onModalSuccess" />
+    <ReclaimDevicesModal v-model="isReclaimModalOpen" :user="userToReclaim" @success="onReclaimSuccess" />
 
     <!-- Confirm Dialog -->
     <AppConfirmDialog v-if="isConfirmOpen" title="Xác nhận xóa"
@@ -306,6 +334,17 @@ function formatDate(dateStr: string) {
   background: rgba(59, 130, 246, 0.15);
   color: #60a5fa;
   border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.device-count {
+  color: #fbbf24;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.btn-icon.text-warning:hover {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
 }
 
 .actions-col {

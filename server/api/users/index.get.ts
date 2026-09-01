@@ -26,7 +26,21 @@ export default defineEventHandler(async (event) => {
             name: true,
             role: true,
             createdAt: true,
-            updatedAt: true
+            updatedAt: true,
+            assignments: {
+                where: { returnedAt: null },
+                select: {
+                    id: true,
+                    device: {
+                        select: {
+                            id: true,
+                            name: true,
+                            serialNumber: true,
+                            condition: true
+                        }
+                    }
+                }
+            }
         },
         orderBy: {
             createdAt: 'desc'

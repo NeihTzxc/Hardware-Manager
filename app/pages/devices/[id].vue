@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import Tabs from '~/components/ui/Tabs.vue'
 import AppButton from '~/components/ui/AppButton.vue'
+import AppDialog from '~/components/ui/AppDialog.vue'
+import AppFormControl from '~/components/ui/AppFormControl.vue'
 import DeviceModal from '~/components/modals/DeviceModal.vue'
 import BorrowModal from '~/components/modals/BorrowModal.vue'
 import ArrowLeftIcon from '~/components/ui/icons/ArrowLeftIcon.vue'
@@ -20,6 +22,23 @@ const loading = ref(true)
 
 const isEditModalOpen = ref(false)
 const isBorrowModalOpen = ref(false)
+const isReturnModalOpen = ref(false)
+const returning = ref(false)
+const { success, error: notifyError } = useNotification()
+const returnForm = reactive({
+  conditionAfter: 'GOOD',
+  notes: ''
+})
+
+const currentAssignment = computed(() => device.value?.assignments?.find((assignment: any) => !assignment.returnedAt))
+
+const conditions = [
+  { value: 'NEW', label: 'Mới' },
+  { value: 'GOOD', label: 'Tốt' },
+  { value: 'FAIR', label: 'Bình thường' },
+  { value: 'POOR', label: 'Kém' },
+  { value: 'DAMAGED', label: 'Hỏng' }
+]
 
 const tabs = [
   { id: 'assignments', label: 'Lịch sử cấp phát', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
@@ -46,6 +65,34 @@ function onDeviceSave() {
   auditLogs.value = [] // Reset logs to force refetch
   if (activeTab.value === 'history') {
     fetchAuditLogs()
+  }
+}
+
+function openReturnModal() {
+  if (!device.value || !currentAssignment.value) return
+  returnForm.conditionAfter = device.value.condition || 'GOOD'
+  returnForm.notes = ''
+  isReturnModalOpen.value = true
+}
+
+async function handleReturn() {
+  if (!currentAssignment.value) return
+
+  returning.value = true
+  try {
+    const result = await api<{ success: boolean }>(`/api/assignments/${currentAssignment.value.id}/return`, {
+      method: 'PUT',
+      body: returnForm
+    })
+    if (result.success) {
+      success('Thu hồi thành công', 'Thiết bị đã được đưa về trạng thái sẵn sàng.')
+      isReturnModalOpen.value = false
+      onDeviceSave()
+    }
+  } catch (err: any) {
+    notifyError('Không thể thu hồi', err.data?.message || 'Có lỗi xảy ra khi thu hồi thiết bị.')
+  } finally {
+    returning.value = false
   }
 }
 
@@ -147,7 +194,10 @@ onMounted(() => {
       <div class="header-actions" v-if="device">
         <AppButton label="Sửa thông tin" variant="secondary" @click="isEditModalOpen = true" />
         <AppButton v-if="device.status === 'AVAILABLE'" label="Cấp phát (Mượn)" variant="primary" @click="isBorrowModalOpen = true" />
-        <AppButton v-else-if="device.status === 'IN_USE'" label="Đổi người sử dụng" variant="primary" @click="isBorrowModalOpen = true" />
+        <template v-else-if="device.status === 'IN_USE'">
+          <AppButton label="Thu hồi thiết bị" variant="secondary" @click="openReturnModal" />
+          <AppButton label="Đổi người sử dụng" variant="primary" @click="isBorrowModalOpen = true" />
+        </template>
       </div>
     </div>
 
@@ -361,6 +411,27 @@ onMounted(() => {
     <DeviceModal v-if="device" v-model="isEditModalOpen" :device="device" @save="onDeviceSave" />
     <BorrowModal v-if="device" v-model="isBorrowModalOpen" :device="device"
       :transfer="device.status === 'IN_USE'" @save="onDeviceSave" />
+    <AppDialog v-model="isReturnModalOpen" title="Thu hồi thiết bị" size="md">
+      <div v-if="currentAssignment" class="space-y-4">
+        <div class="rounded-lg border border-border bg-surface p-3 text-sm">
+          <div class="font-semibold">{{ device.name }}</div>
+          <div class="text-xs text-muted">{{ device.serialNumber || 'Không có số serial' }}</div>
+          <div class="mt-2">Người đang sử dụng: <b>{{ currentAssignment.user.name || currentAssignment.user.email }}</b></div>
+        </div>
+        <AppFormControl label="Tình trạng khi thu hồi" id="return-condition">
+          <select id="return-condition" v-model="returnForm.conditionAfter">
+            <option v-for="condition in conditions" :key="condition.value" :value="condition.value">{{ condition.label }}</option>
+          </select>
+        </AppFormControl>
+        <AppFormControl label="Ghi chú" id="return-notes">
+          <textarea id="return-notes" v-model="returnForm.notes" rows="3" placeholder="Ghi nhận tình trạng, phụ kiện đi kèm..." />
+        </AppFormControl>
+      </div>
+      <template #footer>
+        <AppButton label="Hủy" variant="ghost" @click="isReturnModalOpen = false" />
+        <AppButton label="Xác nhận thu hồi" variant="primary" :loading="returning" @click="handleReturn" />
+      </template>
+    </AppDialog>
   </div>
 </template>
 
